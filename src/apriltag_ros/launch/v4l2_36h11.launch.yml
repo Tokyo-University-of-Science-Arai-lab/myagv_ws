@@ -1,0 +1,49 @@
+launch:
+- arg:
+    name: device
+    default: "0"
+
+- node_container:
+    pkg: rclcpp_components
+    exec: component_container
+    name: apriltag_container
+    namespace: ""
+    composable_node:
+    - pkg: usb_cam
+      plugin: usb_cam::UsbCamNode
+      name: camera
+      namespace: usb_cam
+      parameters:
+      - name: video_device
+        value: /dev/video$(var device)
+      - name: camera_info_url
+        value: file:///home/agv2/.ros/camera_info/default_cam.yaml  # キャリブレーションファイルのパス
+      extra_arguments:
+      - name: use_intra_process_comms
+        value: "True"
+
+    - pkg: image_proc
+      plugin: image_proc::RectifyNode
+      name: rectify
+      namespace: usb_cam
+      remappings:
+      - from: image
+        to: image_rect
+      - from: camera_info
+        to: camera_info
+      extra_arguments:
+      - name: use_intra_process_comms
+        value: "True"
+
+    - pkg: apriltag_ros
+      plugin: AprilTagNode
+      name: apriltag
+      namespace: apriltag
+      remappings:
+      - from: /apriltag/image_rect
+        to: image_rect
+      - from: /apriltag/camera_info
+        to: /camera_info
+      extra_arguments:
+      - name: use_intra_process_comms
+        value: "True"

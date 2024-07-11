@@ -1,0 +1,20 @@
+usb_cam_node:
+  ros__parameters:
+    video_device: "/dev/video0"  # これはビデオデバイスを表す文字列である必要があります
+    image_width: 640
+    image_height: 480
+    pixel_format: "yuyv"
+    io_method: "mmap"
+    camera_name: "usb_cam"
+    framerate: 30.0
+    brightness: 128
+    contrast: 32
+    saturation: 32
+    sharpness: 0
+    auto_white_balance: true
+    white_balance: 4000
+    autoexposure: true
+    exposure: 100
+    gain: 0
+    auto_focus: true
+    focus: 0

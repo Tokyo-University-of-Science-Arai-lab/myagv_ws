@@ -1,0 +1,192 @@
+<?xml version="1.0"?>
+<robot name="agv">
+  <material name="silver">
+    <color rgba="0.88 0.88 0.88 1.0"/>
+  </material>
+
+  <!-- Links -->
+  <link name="base_footprint">
+  </link>
+
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0.04257 0.00066 0.17181" rpy="0 0 3.14"/>
+      <mass value="14.718"/>
+      <inertia ixx="0.743" ixy="0.00147" ixz="0.0822" iyy="0.980" iyz="0.00147" izz="0.420"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://agv_description/meshes/base.stl"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 3.14"/>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://agv_description/meshes/base.stl"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 3.14"/>
+      <material name="silver"/>
+    </collision>
+  </link>
+
+  <link name="wheel_right">
+    <inertial>
+      <origin xyz="0.00 0.03 0.00" rpy="0 0 0"/>
+      <mass value="2.77"/>
+      <inertia ixx="0.01" ixy="0.00" ixz="0.00" iyy="0.01" iyz="0.00" izz="0.01"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://agv_description/meshes/wheel.stl"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://agv_description/meshes/wheel.stl"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <material name="silver"/>
+    </collision>
+  </link>
+
+  <link name="wheel_left">
+    <inertial>
+      <origin xyz="0.00 0.03 0.00" rpy="0 0 0"/>
+      <mass value="2.77"/>
+      <inertia ixx="0.00" ixy="0.00" ixz="0.00" iyy="0.01" iyz="0.00" izz="0.01"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://agv_description/meshes/wheel.stl"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://agv_description/meshes/wheel.stl"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <material name="silver"/>
+    </collision>
+  </link>
+
+  <link name="laser">
+    <inertial>
+      <origin xyz="0.00 0.00 0.00" rpy="0 0 0"/>
+      <mass value="0.26763"/>
+      <inertia ixx="0.00165595" ixy="-8.29854e-06" ixz="-3.99028e-11" iyy="0.00129758" iyz="1.56383e-07" izz="0.00130449"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://agv_description/meshes/lidar.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://agv_description/meshes/lidar.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <material name="silver"/>
+    </collision>
+  </link>
+
+  <link name="imu">
+    <inertial>
+      <origin xyz="0.00 0.00 0.00" rpy="0 0 0"/>
+      <mass value="0.26763"/>
+      <inertia ixx="0.00165595" ixy="-8.29854e-06" ixz="-3.99028e-11" iyy="0.00129758" iyz="1.56383e-07" izz="0.00130449"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://agv_description/meshes/wit_imu.stl"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://agv_description/meshes/wit_imu.stl"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <material name="silver"/>
+    </collision>
+  </link>
+  
+  <link name="dummy">
+  </link>
+
+  <joint name="dummy_joint" type="fixed">
+    <parent link="dummy"/>
+    <child link="base_link"/>
+  </joint>
+
+  <!-- Joints -->
+  <joint name="base_joint" type="fixed">
+    <axis xyz="0.0 1.0 0.0"/>
+    <parent link="base_link"/>
+    <child  link="base_footprint"/>
+    <origin xyz="0.0 0.0 0.17181" rpy="0.0 0.0 0.0"/>
+  </joint>
+
+  <joint name="wheel_right_joint" type="fixed">
+    <axis xyz="0.0 1.0 0.0"/>
+    <parent link="base_link"/>
+    <child  link="wheel_right"/>
+    <origin xyz="0.0 -0.17 0.02" rpy="0.0 0.0 3.14"/>
+  </joint>
+
+  <joint name="wheel_left_joint" type="fixed">
+    <axis xyz="0.0 1.0 0.0"/>
+    <parent link="base_link"/>
+    <child  link="wheel_left"/>
+    <origin xyz="0.0 0.17 0.02" rpy="0.0 0.0 0.0"/>
+  </joint>
+
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="laser"/>
+    <origin xyz="-0.165 0.07 0.12" rpy="0.0 0.0 -1.57"/>
+  </joint>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="imu"/>
+    <origin xyz="0.0 0.0 0.1096" rpy="0.0 0.0 0.0"/>
+  </joint>
+
+  <!-- Transmissions -->
+  <transmission name="wheel_right_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="wheel_right_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="wheel_right_joint">
+      <mechanicalReduction>1</mechanicalReduction>
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </actuator>
+  </transmission>
+
+  <transmission name="wheel_left_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="wheel_left_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="wheel_left_joint">
+      <mechanicalReduction>1</mechanicalReduction>
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </actuator>
+  </transmission>
+  
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/agv</robotNamespace>
+      <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+    </plugin>
+  </gazebo>
+</robot>

@@ -1,0 +1,23 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/agv1/myagv_ws/build/myagv_communication",
+        "/home/agv1/myagv_ws/install/myagv_communication/lib/python3.10/site-packages",
+        "/home/agv1/myagv_ws/build/myagv_joy",
+        "/home/agv1/myagv_ws/install/myagv_joy/lib/python3.10/site-packages",
+        "/home/agv1/myagv_ws/install/myagv_description/lib/python3.10/site-packages",
+        "/home/agv1/ros2_ws/build/my_robot_controller",
+        "/home/agv1/ros2_ws/install/my_robot_controller/lib/python3.10/site-packages",
+        "/home/agv1/agv1_ws/build/navigation2",
+        "/home/agv1/agv1_ws/install/navigation2/lib/python3.10/site-packages",
+        "/home/agv1/agv1_ws/build/agv_description",
+        "/home/agv1/agv1_ws/install/agv_description/lib/python3.10/site-packages",
+        "/home/agv1/agv1_ws/build/agv1_qrcode",
+        "/home/agv1/agv1_ws/install/agv1_qrcode/lib/python3.10/site-packages",
+        "/home/agv1/agv1_ws/build/agv1_navigation",
+        "/home/agv1/agv1_ws/install/agv1_navigation/lib/python3.10/site-packages",
+        "/home/agv1/agv1_ws/build/agv1_QR",
+        "/home/agv1/agv1_ws/install/agv1_QR/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ]
+}
