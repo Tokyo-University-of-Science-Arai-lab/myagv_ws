@@ -13,8 +13,8 @@ class DiffDriveController(Node):
     
     def listener_callback(self, Twist):
         d = 0.35
-        vel_r = (Twist.linear.x + d*Twist.angular.z)*240    #385(0.95)
-        vel_l = (Twist.linear.x - d*Twist.angular.z)*234    #232 
+        vel_r = (Twist.linear.x + d*-Twist.angular.z)*240    #385(0.95)
+        vel_l = (Twist.linear.x - d*-Twist.angular.z)*234    #232 
 
         '''    
         if vel_r < 0:
