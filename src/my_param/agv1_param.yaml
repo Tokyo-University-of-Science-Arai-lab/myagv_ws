@@ -143,26 +143,26 @@ controller_server:
     FollowPath:
       plugin: "dwb_core::DWBLocalPlanner"
       debug_trajectory_details: True
-      min_vel_x: 0.0
+      min_vel_x: 0.1
       min_vel_y: 0.0
-      max_vel_x: 0.2
+      max_vel_x: 0.5
       max_vel_y: 0.0
-      max_vel_theta: 0.4  #1.5(7/2)
+      max_vel_theta: 1.0  #1.5(7/2)
       min_speed_xy: 0.0
-      max_speed_xy: 0.7
-      min_speed_theta: 0.0
+      max_speed_xy: 0.0
+      min_speed_theta: 0.5
       # Add high threshold velocity for turtlebot 3 issue.
       # https://github.com/ROBOTIS-GIT/turtlebot3_simulations/issues/75
-      acc_lim_x: 1.0
+      acc_lim_x: 0.7
       acc_lim_y: 0.0
-      acc_lim_theta: 0.9  #1.5
-      decel_lim_x: -1.0
+      acc_lim_theta: 0.7  #1.5
+      decel_lim_x: -0.5
       decel_lim_y: 0.0
-      decel_lim_theta: -0.9
+      decel_lim_theta: -3.0
       vx_samples: 20
       vy_samples: 5
       vtheta_samples: 20
-      sim_time: 5.0
+      sim_time: 4.0
       linear_granularity: 0.4
       angular_granularity: 0.1
       transform_tolerance: 0.2
@@ -194,11 +194,11 @@ local_costmap:
       width: 3
       height: 3
       resolution: 0.05
-      #footprint: "[ [0.12, 0.18], [0.12, -0.18], [-0.32, -0.18], [-0.32, 0.18]]"
+      footprint: "[ [0.12, 0.18], [0.12, -0.18], [-0.32, -0.18], [-0.32, 0.18]]"
       #footprint: "[ [0.141, 0.2], [0.141, -0.2], [-0.339, -0.2], [-0.339, 0.2]]"
       #footprint: "[ [0.15, 0.21], [0.15, -0.21], [-0.35, -0.21], [-0.35, 0.21]]"
       #footprint: "[ [0.1, 0.178], [0.15, -0.178], [-0.35, -0.178], [-0.35, 0.178]]"
-      footprint: "[ [0.1, 0.1], [0.1, -0.1], [-0.1, -0.1], [-0.1, 0.1]]"
+      #footprint: "[ [0.1, 0.1], [0.1, -0.1], [-0.1, -0.1], [-0.1, 0.1]]"
       #robot_radius: 0.175
       plugins: ["voxel_layer", "inflation_layer"]
       inflation_layer:
@@ -352,13 +352,13 @@ velocity_smoother:
     smoothing_frequency: 20.0
     scale_velocities: False
     feedback: "OPEN_LOOP"
-    max_velocity: [0.2, 0.0, 0.4]  #th=1.5(7/1) 1.2(7/2)
-    min_velocity: [0.0, 0.0, -0.4]
-    max_accel: [1.0, 0.0, 0.9] # th 3.2 2.2(7/1) 1.5(7/2)
-    max_decel: [-1.0, 0.0, -0.9]
+    max_velocity: [0.5, 0.0, 1.0]  #th=1.5(7/1) 1.2(7/2)
+    min_velocity: [0.1, 0.0, 0.0]
+    max_accel: [0.7, 0.0, 0.7] # th 3.2 2.2(7/1) 1.5(7/2)
+    max_decel: [-1.0, 0.0, -3.0]
     odom_topic: "odom"
     odom_duration: 0.1
-    deadband_velocity: [0.15, 0.0, 0.3] #th=1.4(7/1) 0.8(7/2)
+    deadband_velocity: [0.2, 0.0, 0.3] #th=1.4(7/1) 0.8(7/2)
     velocity_timeout: 1.0
 
 lifecycle_manager:
