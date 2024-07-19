@@ -32,8 +32,8 @@ amcl:
     sigma_hit: 0.2
     tf_broadcast: true
     transform_tolerance: 1.0
-    update_min_a: 0.05
-    update_min_d: 0.05
+    update_min_a: 0.01
+    update_min_d: 0.01
     z_hit: 0.5
     z_max: 0.05
     z_rand: 0.5
@@ -136,8 +136,8 @@ controller_server:
     general_goal_checker:
       stateful: True
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.5 #0.25
-      yaw_goal_tolerance: 0.5
+      xy_goal_tolerance: 0.2 #0.25
+      yaw_goal_tolerance: 0.3
     # DWB parameters
     FollowPath:
       plugin: "dwb_core::DWBLocalPlanner"
@@ -146,7 +146,7 @@ controller_server:
       min_vel_y: 0.0
       max_vel_x: 0.3
       max_vel_y: 0.0
-      max_vel_theta: 0.5  #1.5(7/2)
+      max_vel_theta: 1.0  #1.5(7/2)
       min_speed_xy: 0.0
       max_speed_xy: 0.7
       min_speed_theta: 0.0
@@ -154,10 +154,10 @@ controller_server:
       # https://github.com/ROBOTIS-GIT/turtlebot3_simulations/issues/75
       acc_lim_x: 1.0
       acc_lim_y: 0.0
-      acc_lim_theta: 0.9  #1.5
+      acc_lim_theta: 1.5  #1.5
       decel_lim_x: -1.0
       decel_lim_y: 0.0
-      decel_lim_theta: -0.9
+      decel_lim_theta: -1.5
       vx_samples: 20
       vy_samples: 5
       vtheta_samples: 20
@@ -201,8 +201,8 @@ local_costmap:
       plugins: ["voxel_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        cost_scaling_factor: 3.0  #3.0 2.0 1.5
-        inflation_radius: 0.55    #0.55 0.25 0.47
+        cost_scaling_factor: 1.0  #3.0 2.0 1.5
+        inflation_radius: 0.1    #0.55 0.25 0.47
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
@@ -322,9 +322,9 @@ behavior_server:
     transform_tolerance: 0.1
     use_sim_time: true
     simulate_ahead_time: 2.0
-    max_rotational_vel: 0.7 #1.0
-    min_rotational_vel: 0.4
-    rotational_acc_lim: 0.9
+    max_rotational_vel: 1.0 #1.0
+    min_rotational_vel: 0.8
+    rotational_acc_lim: 1.0
 
 robot_state_publisher:
   ros__parameters:
@@ -347,13 +347,13 @@ velocity_smoother:
     smoothing_frequency: 20.0
     scale_velocities: False
     feedback: "OPEN_LOOP"
-    max_velocity: [0.3, 0.0, 0.5]  #th=1.5(7/1) 1.2(7/2)
-    min_velocity: [0.0, 0.0, -0.5]
-    max_accel: [1.0, 0.0, 0.9] # th 3.2 2.2(7/1) 1.5(7/2)
-    max_decel: [-1.0, 0.0, -0.9]
+    max_velocity: [0.3, 0.0, 1.0]  #th=1.5(7/1) 1.2(7/2)
+    min_velocity: [0.0, 0.0, -1.0]
+    max_accel: [1.0, 0.0, 1.5] # th 3.2 2.2(7/1) 1.5(7/2)
+    max_decel: [-1.0, 0.0, -1.5]
     odom_topic: "odom"
     odom_duration: 0.1
-    deadband_velocity: [0.2, 0.0, 0.4] #th=1.4(7/1) 0.8(7/2)
+    deadband_velocity: [0.2, 0.0, 0.8] #th=1.4(7/1) 0.8(7/2)
     velocity_timeout: 1.0
 
 lifecycle_manager:
