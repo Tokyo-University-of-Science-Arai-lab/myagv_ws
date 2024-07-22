@@ -22,9 +22,15 @@ def generate_launch_description():
     if not os.path.exists(camera_info_file):
         raise FileNotFoundError(f"Camera info file not found: {camera_info_file}")
     
+    namespace = LaunchConfiguration('namespace', default='agv2')
     device = LaunchConfiguration('device', default='0')
 
     return LaunchDescription([
+        DeclareLaunchArgument(
+            'namespace',
+            default_value='agent',
+            description='Namespace for the nodes'
+        ),
         DeclareLaunchArgument(
             'device',
             default_value='0',
@@ -33,7 +39,7 @@ def generate_launch_description():
 
         ComposableNodeContainer(
             name='apriltag_container',
-            namespace='',
+            namespace=namespace,
             package='rclcpp_components',
             executable='component_container',
             composable_node_descriptions=[
@@ -77,35 +83,25 @@ def generate_launch_description():
             package='myagv_communication',
             executable='pd_control_node',  # ここに実行ファイル名（.pyを除く）を入力してください
             name='pd_control_node',
+            namespace=namespace,
             output='screen'
         ),
         Node(
             package='myagv_communication',
             executable='move_control_node',  # ここに実行ファイル名（.pyを除く）を入力してください
             name='move_control_node',
+            namespace=namespace,
             output='screen'
         ),
         Node(
             package='usb_cam',
             executable='usb_cam_node_exe',
             name='usb_cam',
+            namespace=namespace,
             parameters=[yaml_file],
             output='screen',
         ),
     ])
 
-
-'''
-ここに入っているファイルはagentだから、以下の3点のファイルを起動する。
-・apriltag
-・Navigation
-・move_controller
-・usb_cam_node
-・pd_control_node
-
-
-
-
-
-
-'''
+if __name__ == '__main__':
+    generate_launch_description()

@@ -5,12 +5,13 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch.actions import LogInfo
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
 def generate_launch_description():
+    namespace = LaunchConfiguration('namespace', default='agv2')
+
     channel_type =  LaunchConfiguration('channel_type', default='serial')
     serial_port = LaunchConfiguration('serial_port', default='/dev/ttyUSB0')
     serial_baudrate = LaunchConfiguration('serial_baudrate', default='256000')
@@ -22,12 +23,14 @@ def generate_launch_description():
     script_dir = os.path.dirname(os.path.realpath(__file__))
     urdf_file = os.path.join(script_dir, '../urdf/agv.urdf')
     
-    
-
     with open(urdf_file, 'r') as infp:
         robot_desc = infp.read()
     
     return LaunchDescription([
+        DeclareLaunchArgument(
+            'namespace',
+            default_value=namespace,
+            description='Namespace for the nodes'),
 
         DeclareLaunchArgument(
             'channel_type',
@@ -58,16 +61,17 @@ def generate_launch_description():
             'angle_compensate',
             default_value=angle_compensate,
             description='Specifying whether or not to enable angle_compensate of scan data'),
+        
         DeclareLaunchArgument(
             'scan_mode',
             default_value=scan_mode,
             description='Specifying scan mode of lidar'),
 
-
         Node(
             package='sllidar_ros2',
             executable='sllidar_node',
             name='sllidar_node',
+            namespace=namespace,
             parameters=[{'channel_type':channel_type,
                          'serial_port': serial_port, 
                          'serial_baudrate': serial_baudrate, 
@@ -78,26 +82,30 @@ def generate_launch_description():
         ),
         Node(
             package='myagv_communication',
-            executable='diff_drive_controller_node',  # 実行ファイル名（.pyを除く）を入力してください
+            executable='diff_drive_controller_node',
             name='diff_drive_controller_node',
+            namespace=namespace,
             output='screen'
         ),
         Node(
             package='myagv_communication',
-            executable='odometry_node',  # 実行ファイル名を修正
+            executable='odometry_node',
             name='odometry_publisher',
+            namespace=namespace,
             output='screen'
         ),
         Node(
             package='joint_state_publisher',
             executable='joint_state_publisher',
             name='joint_state_publisher',
+            namespace=namespace,
             output='screen'
         ),
         Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
             name='robot_state_publisher',
+            namespace=namespace,
             output='screen',
             parameters=[{'robot_description': robot_desc}]
         ),
@@ -105,16 +113,10 @@ def generate_launch_description():
             package='myagv_communication',
             executable='serial',
             name='serial_node',
+            namespace=namespace,
             output='screen'
         ),
     ])
 
-'''
-ここに入っているファイルはcoreだから、以下の3点のファイルを起動する。
-・TF関連
-・serial通信
-・LiDAR関連のノード
-・cmd_vel-モーター制御値のコード
-・
-・
-'''
+if __name__ == '__main__':
+    generate_launch_description()
