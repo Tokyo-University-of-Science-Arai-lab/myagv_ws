@@ -1,0 +1,26 @@
+tf
+ros2 launch agv_description tf_launch.py
+
+lidar
+ros2 launch sllidar_ros2 view_sllidar_a2m8_launch.py
+
+slam_toolbox
+ros2 launch slam_toolbox online_async_launch.py
+
+slamで作ったマップを保存
+ros2 run nav2_map_server map_saver_cli --ros-args -p save_map_timeout:=100000.0 -p map_name:=/home/user/map
+
+保存方法（改訂版？？）
+ros2 run nav2_map_server map_saver_cli -f ~/myagv_ws/src/myagv_navigation/map/new_map
+
+
+
+navigation2
+ros2 launch nav2_bringup bringup_launch.py use_sim_time:=False map:=/home/agv1/agv1_ws/map_1718364393.yaml params_file:=/home/agv1/agv1_ws/src/my_param/agv1_param.yaml
+
+改訂版？？
+ros2 launch myagv_navigation myagv_navigation.launch.py
+
+
+navigationのときのrviz2
+ros2 run rviz2 rviz2 -d $(ros2 pkg prefix nav2_bringup)/share/nav2_bringup/rviz/nav2_default_view.rviz
