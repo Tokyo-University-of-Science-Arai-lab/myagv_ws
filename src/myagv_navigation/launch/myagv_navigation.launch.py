@@ -21,7 +21,7 @@ def generate_launch_description():
 
     # 自分たちのマップとパラメータファイルのパスを設定
     custom_map_file = os.path.join(get_package_share_directory('myagv_navigation'), 'map', 'map_1721186946.yaml')
-    custom_params_file = os.path.join(get_package_share_directory('my_param'), 'agv1_param.yaml')
+    custom_params_file = os.path.join(get_package_share_directory('myagv_navigation'), 'config', 'agv1_param.yaml')
 
     # Create the launch configuration variables
     namespace = LaunchConfiguration('namespace')

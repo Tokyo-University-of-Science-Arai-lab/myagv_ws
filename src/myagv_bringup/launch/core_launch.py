@@ -19,9 +19,12 @@ def generate_launch_description():
     inverted = LaunchConfiguration('inverted', default='false')
     angle_compensate = LaunchConfiguration('angle_compensate', default='true')
     scan_mode = LaunchConfiguration('scan_mode', default='Sensitivity')
-    # tf_launch.py があるディレクトリを基準に相対パスを決定
-    script_dir = os.path.dirname(os.path.realpath(__file__))
-    urdf_file = os.path.join(script_dir, '../urdf/agv.urdf')
+     # urdfファイルの正しいパスを設定
+    urdf_file = os.path.join(
+        get_package_share_directory('myagv_description'),
+        'urdf',
+        'agv.urdf'
+    )
     
     with open(urdf_file, 'r') as infp:
         robot_desc = infp.read()
