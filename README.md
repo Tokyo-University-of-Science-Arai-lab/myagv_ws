@@ -20,6 +20,7 @@ ros2 launch myagv_bringup core_launch.py
 ```
 
 SLAMの起動手順
+
 slam-toolboxの起動
 ```
 ros2 launch slam_toolbox online_async_launch.py
@@ -30,6 +31,13 @@ rviz2
 ```
 
 rviz2を開いたあとに左下のAddを押して、By topicからMapを追加することで、SLAMしてできたMapを確認できます。
+
+Mapをセーブする方法
+```
+ros2 run nav2_map_server map_saver_cli -f ~/myagv_ws/src/myagv_navigation/map/new_map
+```
+これで、myagv_ws/myagv_navigation/mapにnew_mapとして保存されます。名前を変える際は最後のnew_mapを変更すれば良いです。
+
 
 Navigationの起動手順
 
