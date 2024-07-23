@@ -20,13 +20,12 @@ ros2 launch myagv_bringup core_launch.py
 ```
 
 SLAMの起動手順
+slam-toolboxの起動
 ```
-#slam-toolboxの起動
 ros2 launch slam_toolbox online_async_launch.py
 ```
-
+rviz2
 ```
-#rviz2
 rviz2
 ```
 
