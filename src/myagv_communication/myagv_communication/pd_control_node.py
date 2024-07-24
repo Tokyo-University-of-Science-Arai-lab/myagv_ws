@@ -38,6 +38,7 @@ class PDControlNode(Node):
             now = rclpy.time.Time()
             trans = self.tf_buffer.lookup_transform('default_cam', 'tag36h11:0', now, timeout=rclpy.duration.Duration(seconds=1.0))
             distance = math.sqrt(trans.transform.translation.x ** 2 + trans.transform.translation.y ** 2 + trans.transform.translation.z ** 2)
+            self.get_logger().info("distance=%f" % distance)
             error = self.target_distance - distance
             current_time = self.get_clock().now()
             dt = (current_time - self.prev_time).nanoseconds / 1e9

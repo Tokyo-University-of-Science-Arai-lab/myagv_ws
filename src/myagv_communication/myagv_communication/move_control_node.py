@@ -21,16 +21,17 @@ class MoveControlNode(Node):
 
         # Define destination coordinates
         self.destinations = {
-            "A": (-1.8, 0.5, 1.0),
+            "A": (1.11, 0.0313, 1.0),
             "B": (-0.9, 1.9, 1.0),
             "C": (0.8, 1.97, 1.0),
             "D": (1.95, 0.85, 1.0),
             "E": (1.78, -0.68, 1.0),
             "F": (-0.1, -1.97, 1.0)
         }
-        self.pd_control_publisher = self.create_publisher(Bool, '/pd_control_active', 10)
-        self.arrival_subscription = self.create_subscription(String, '/pd_control_arrival', self.arrival_callback, 10)
-        
+        #self.pd_control_publisher = self.create_publisher(Bool, '/pd_control_active', 10)
+        self.pd_control_publisher = self.create_publisher(String, '/apriltag_start', 10)
+        #self.arrival_subscription = self.create_subscription(String, '/pd_control_arrival', self.arrival_callback, 10)
+        self.arrival_subscription = self.create_subscription(String, '/agv_arrival', self.arrival_callback, 10)
 
 
     def listener_callback(self, msg):
@@ -71,7 +72,7 @@ class MoveControlNode(Node):
     def get_result_callback(self, future):
         result = future.result().status
         if result == 4:  # 4 is the status code for succeeded
-            if not self.current_destination in ["D", "E"]:
+            if not self.current_destination in ["A","D", "E"]:
                 self.publish_goal_reached(self.current_destination)
             else:
                 self.activate_pd_control()
@@ -85,13 +86,16 @@ class MoveControlNode(Node):
         self.get_logger().info(f'Published: I arrived {destination_key}!')
 
     def activate_pd_control(self):
+    	self.pd_control_publisher.publish(String(data="start"))
+    	self.get_logger().info('pd_control start signal sent.')
+    	'''
         self.get_logger().info('PD Control activated.')
-
         pd_control_msg = Bool()
         pd_control_msg.data = True
         self.pd_control_publisher.publish(pd_control_msg)
+        '''
 
-    def arrival_callback(self):
+    def arrival_callback(self, msg):
         self.publish_goal_reached(self.current_destination)
     
 
