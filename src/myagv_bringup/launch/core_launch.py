@@ -10,7 +10,7 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    namespace = LaunchConfiguration('namespace', default='agv2')
+    namespace = LaunchConfiguration('namespace', default='agv3')
 
     channel_type =  LaunchConfiguration('channel_type', default='serial')
     serial_port = LaunchConfiguration('serial_port', default='/dev/ttyUSB0')

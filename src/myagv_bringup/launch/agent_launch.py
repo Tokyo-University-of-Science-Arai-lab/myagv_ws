@@ -22,7 +22,7 @@ def generate_launch_description():
     if not os.path.exists(camera_info_file):
         raise FileNotFoundError(f"Camera info file not found: {camera_info_file}")
     
-    namespace = LaunchConfiguration('namespace', default='agv2')
+    namespace = LaunchConfiguration('namespace', default='agv3')
     device = LaunchConfiguration('device', default='0')
 
     return LaunchDescription([
