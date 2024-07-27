@@ -29,6 +29,7 @@ setup(
             "testpd_node = myagv_communication.testpd:main",
             "message_node = myagv_communication.message:main",
             "move_forward_node = myagv_communication.move_forward_node:main",
+            'test_node = myagv_communication.test_node:main',
         ],
     },
 )
