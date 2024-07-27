@@ -51,7 +51,7 @@ class PDControlNode(Node):
             if distance <= 0.005 or abs(cmd_vel_msg.linear.x) <= 0.08:
                 cmd_vel_msg.linear.x = 0.0
                 self.arrival_count += 1  # 到着回数をインクリメント
-                self.publish_arrival('agv1', 'B' if self.arrival_count % 2 != 0 else 'C')
+                self.publish_arrival('agv1', 'B' if self.arrival_count % 2 != 0 else 'C') #各agvの番号に変える
                 self.pd_control_active = False
             
             self.cmd_vel_publisher.publish(cmd_vel_msg)

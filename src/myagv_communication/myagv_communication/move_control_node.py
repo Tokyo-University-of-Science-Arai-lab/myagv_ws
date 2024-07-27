@@ -29,7 +29,7 @@ class MoveControlNode(Node):
             "F": (-0.1, -1.97, 1.0)
         }
         #self.pd_control_publisher = self.create_publisher(Bool, '/pd_control_active', 10)
-        self.pd_control_publisher = self.create_publisher(String, '/apriltag_start', 10)
+        self.move_forward_publisher = self.create_publisher(String, '/move_forward_start', 10)
         #self.arrival_subscription = self.create_subscription(String, '/pd_control_arrival', self.arrival_callback, 10)
         self.arrival_subscription = self.create_subscription(String, '/agv_arrival', self.arrival_callback, 10)
 
@@ -75,7 +75,7 @@ class MoveControlNode(Node):
             if not self.current_destination in ["A","D", "E"]:
                 self.publish_goal_reached(self.current_destination)
             else:
-                self.activate_pd_control()
+                self.activate_move_forward()
         else:
             self.get_logger().info('ゴールに到達できませんでした')
 
@@ -85,10 +85,10 @@ class MoveControlNode(Node):
         self.publisher_.publish(message)
         self.get_logger().info(f'Published: I arrived {destination_key}!')
 
-    def activate_pd_control(self):
-    	self.pd_control_publisher.publish(String(data="start"))
-    	self.get_logger().info('pd_control start signal sent.')
-    	'''
+    def activate_move_forward(self):
+        self.move_forward_publisher.publish(String(data="start"))
+        self.get_logger().info('pd_control start signal sent.')
+        '''
         self.get_logger().info('PD Control activated.')
         pd_control_msg = Bool()
         pd_control_msg.data = True

@@ -11,24 +11,24 @@ def generate_launch_description():
     script_dir = os.path.dirname(os.path.realpath(__file__))
 
     # yamlファイルの相対パスを設定
-    yaml_file = os.path.join(script_dir, '../../../my_param/usb_cam_params.yaml')
+    yaml_file = os.path.join(script_dir, '../../my_param/usb_cam_params.yaml')
     yaml_file = os.path.abspath(yaml_file)
     if not os.path.exists(yaml_file):
         raise FileNotFoundError(f"YAML file not found: {yaml_file}")
     
     # camera_infoファイルの相対パスを設定
-    camera_info_file = os.path.join(script_dir, '../../../../.ros/camera_info/default_cam.yaml')
+    camera_info_file = os.path.join(script_dir, '../../my_param/default_cam.yaml')
     camera_info_file = os.path.abspath(camera_info_file)
     if not os.path.exists(camera_info_file):
         raise FileNotFoundError(f"Camera info file not found: {camera_info_file}")
     
-    namespace = LaunchConfiguration('namespace', default='agv2')
+    namespace = LaunchConfiguration('namespace', default='agv1')
     device = LaunchConfiguration('device', default='0')
 
     return LaunchDescription([
         DeclareLaunchArgument(
             'namespace',
-            default_value='agent',
+            default_value='agv1',
             description='Namespace for the nodes'
         ),
         DeclareLaunchArgument(
@@ -58,10 +58,10 @@ def generate_launch_description():
                     package='image_proc',
                     plugin='image_proc::RectifyNode',
                     name='rectify',
-                    namespace='usb_cam',
+                    namespace=namespace,
                     remappings=[
-                        ('image', 'image_raw'),
-                        ('camera_info', 'camera_info')
+                        ('image', '/agv1/image_raw'),
+                        ('camera_info', '/agv1/camera_info')
                     ],
                     extra_arguments=[{'use_intra_process_comms': True}]
                 ),
@@ -69,10 +69,10 @@ def generate_launch_description():
                     package='apriltag_ros',
                     plugin='AprilTagNode',
                     name='apriltag',
-                    namespace='apriltag',
+                    namespace=namespace,
                     remappings=[
-                        ('/apriltag/image_rect', '/image_raw'),
-                        ('/apriltag/camera_info', '/camera_info')
+                        ('/apriltag/image_rect', '/agv1/image_raw'),
+                        ('/apriltag/camera_info', '/agv1/camera_info')
                     ],
                     extra_arguments=[{'use_intra_process_comms': True}]
                 ),
@@ -99,6 +99,13 @@ def generate_launch_description():
             name='usb_cam',
             namespace=namespace,
             parameters=[yaml_file],
+            output='screen',
+        ),
+        Node(
+            package='myagv_communication',
+            executable='move_forward_node',
+            name='move_forward_node',
+            namespace=namespace,
             output='screen',
         ),
     ])

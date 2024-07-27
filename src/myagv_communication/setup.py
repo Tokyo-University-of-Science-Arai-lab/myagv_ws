@@ -28,6 +28,7 @@ setup(
             "odometry_node = myagv_communication.odometry:main",
             "testpd_node = myagv_communication.testpd:main",
             "message_node = myagv_communication.message:main",
+            "move_forward_node = myagv_communication.move_forward_node:main",
         ],
     },
 )
