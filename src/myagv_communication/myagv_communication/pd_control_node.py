@@ -8,7 +8,7 @@ from std_msgs.msg import String
 class PDControlNode(Node):
     def __init__(self, namespace=''):
         super().__init__('pd_control_node', namespace=namespace)
-        self.target_distance = 7.91  # 目標距離
+        self.target_distance = 15  # 目標距離 7.91
         self.kp = 0.87  # 比例ゲイン
         self.kd = 0.07  # 微分ゲイン
         self.cmd_vel_publisher = self.create_publisher(Twist, f'/{namespace}/cmd_vel', 10)
@@ -36,7 +36,11 @@ class PDControlNode(Node):
             return
         try:
             now = rclpy.time.Time()
-            trans = self.tf_buffer.lookup_transform(f'{self.get_namespace()}/default_cam', f'{self.get_namespace()}/tag36h11:0', now, timeout=rclpy.duration.Duration(seconds=1.0))
+            namespace = self.get_namespace().strip("/")  # 先頭と末尾の '/' を取り除く
+            # 正しくフレーム名を構築
+            cam_frame = 'default_cam'
+            tag_frame = 'tag36h11:0'
+            trans = self.tf_buffer.lookup_transform(cam_frame, tag_frame, now, timeout=rclpy.duration.Duration(seconds=1.0))
             distance = math.sqrt(trans.transform.translation.x ** 2 + trans.transform.translation.y ** 2 + trans.transform.translation.z ** 2)
             self.get_logger().info(f"distance={distance}")
             error = self.target_distance - distance
@@ -70,7 +74,7 @@ class PDControlNode(Node):
         msg = String()
         msg.data = f'{agv_id} {position}'
         self.publisher_arrival.publish(msg)
-        self.get_logger().info(f'{agv_id}が{position}に到着しました。')
+        self.get_logger().info(f'{agv_id} {position}')
 
 def main(args=None):
     rclpy.init(args=args)

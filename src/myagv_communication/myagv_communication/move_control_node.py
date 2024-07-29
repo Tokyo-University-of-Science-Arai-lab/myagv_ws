@@ -95,6 +95,7 @@ class MoveControlNode(Node):
         '''
 
     def arrival_callback(self, msg):
+        self.current_destination = 'B' ##ここは試験用。消す！！！！！
         self.publish_goal_reached(self.current_destination)
 
     '''

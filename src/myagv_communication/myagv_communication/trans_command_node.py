@@ -11,30 +11,30 @@ class TransCommandNode(Node):
             self.listener_callback,
             10
         )
-        self.publishers = {}
-        self.subscribers = {}
+        self.agv_publishers = {}
+        self.agv_subscribers = {}
         self.arrival_publisher = self.create_publisher(String, '/agv_arrival', 10)
 
     def listener_callback(self, msg):
         parts = msg.data.split()
         agv_id, action, _, position = parts
         # Ensure each AGV has a subscriber and publisher
-        if agv_id not in self.subscribers:
-            self.subscribers[agv_id] = self.create_subscription(
+        if agv_id not in self.agv_subscribers:
+            self.agv_subscribers[agv_id] = self.create_subscription(
                 String,
                 f'/{agv_id}/agv_reach',
                 lambda msg: self.agv_command_callback(msg, agv_id),
                 10
             )
-        if agv_id not in self.publishers:
-            self.publishers[agv_id] = self.create_publisher(
+        if agv_id not in self.agv_publishers:
+            self.agv_publishers[agv_id] = self.create_publisher(
                 String,
                 f'/{agv_id}/agv_command',
                 10
             )
         command_msg = String()
         command_msg.data = f'go to {position}'
-        self.publishers[agv_id].publish(command_msg)
+        self.agv_publishers[agv_id].publish(command_msg)
         self.get_logger().info(f'Sending command to {agv_id}: go to {position}')
 
     def agv_command_callback(self, msg, agv_id):
