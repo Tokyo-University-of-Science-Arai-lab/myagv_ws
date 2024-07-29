@@ -105,8 +105,9 @@ def generate_launch_description():
             package='myagv_communication',
             executable='move_forward_node',
             name='move_forward_node',
-            namespace=namespace,
+            namespace=namespace,  # このnamespaceがノードに渡されます
             output='screen',
+            parameters=[{'namespace': LaunchConfiguration('namespace')}]
         ),
     ])
 

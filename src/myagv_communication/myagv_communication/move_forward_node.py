@@ -5,12 +5,12 @@ from geometry_msgs.msg import Twist
 from tf2_msgs.msg import TFMessage
 
 class MoveForwardNode(Node):
-    def __init__(self):
-        super().__init__('move_forward_node')
-        self.publisher_ = self.create_publisher(String, '/apriltag_start', 10)
-        self.cmd_vel_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
-        self.subscription = self.create_subscription(TFMessage,'/tf',self.tf_callback,10)
-        self.move_forward_subscription = self.create_subscription(String,'/move_forward_start',self.move_forward_callback,10)
+    def __init__(self, namespace=''):
+        super().__init__('move_forward_node', namespace=namespace)
+        self.publisher_ = self.create_publisher(String, f'/{namespace}/apriltag_start', 10)
+        self.cmd_vel_publisher = self.create_publisher(Twist, f'/{namespace}/cmd_vel', 10)
+        self.subscription = self.create_subscription(TFMessage,'/tf', self.tf_callback, 10)
+        self.move_forward_subscription = self.create_subscription(String, f'/{namespace}/move_forward_start', self.move_forward_callback, 10)
         self.move_forward_active = False
         self.timer = self.create_timer(0.1, self.control_loop)  # 0.1秒ごとに制御ループを実行
 
@@ -46,11 +46,12 @@ class MoveForwardNode(Node):
         msg = String()
         msg.data = 'start'
         self.publisher_.publish(msg)
-        self.get_logger().info('Publishing: "start" to /apriltag_start')
+        self.get_logger().info(f'Publishing: "start" to /{self.get_namespace()}/apriltag_start')
 
 def main(args=None):
     rclpy.init(args=args)
-    node = MoveForwardNode()
+    namespace = 'agv1'  # デフォルト値
+    node = MoveForwardNode(namespace=namespace)
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()

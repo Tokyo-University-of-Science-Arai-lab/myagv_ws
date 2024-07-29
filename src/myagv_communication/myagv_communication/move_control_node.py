@@ -9,14 +9,13 @@ from std_msgs.msg import Bool
 
 class MoveControlNode(Node):
 
-    def __init__(self):
-        super().__init__('move_control_node')
-        self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
-        self.publisher_ = self.create_publisher(String, '/ans/chatter', 10) #['agv_arrival']
-        self.subscription = self.create_subscription(String, '/chatter', self.listener_callback, 10) #'agv_command'
-        #self.cmd_vel_subscription = self.create_subscription(Twist, '/cmd_vel', self.cmd_vel_callback, 10)
-        #self.cmd_vel_publisher = self.create_publisher(Twist, '/cmd_vel_limited', 10)
-        self.subscription  # prevent unused variable warning
+    def __init__(self, namespace=''):
+        super().__init__('move_control_node', namespace=namespace)
+        self._action_client = ActionClient(self, NavigateToPose, f'{namespace}/navigate_to_pose')
+        self.publisher_ = self.create_publisher(String, f'/{namespace}/agv_reach', 10)  # ['agv_arrival']
+        self.subscription = self.create_subscription(String, f'/{namespace}/agv_command', self.listener_callback, 10)  # 'agv_command'
+        # self.cmd_vel_subscription = self.create_subscription(Twist, f'/{namespace}/cmd_vel', self.cmd_vel_callback, 10)
+        # self.cmd_vel_publisher = self.create_publisher(Twist, f'/{namespace}/cmd_vel_limited', 10)
         self.current_destination = None  # Variable to store the current destination
 
         # Define destination coordinates
@@ -28,14 +27,13 @@ class MoveControlNode(Node):
             "E": (1.78, -0.68, 1.0),
             "F": (-0.1, -1.97, 1.0)
         }
-        #self.pd_control_publisher = self.create_publisher(Bool, '/pd_control_active', 10)
-        self.move_forward_publisher = self.create_publisher(String, '/move_forward_start', 10)
-        #self.arrival_subscription = self.create_subscription(String, '/pd_control_arrival', self.arrival_callback, 10)
-        self.arrival_subscription = self.create_subscription(String, '/agv_arrival', self.arrival_callback, 10)
-
+        # self.pd_control_publisher = self.create_publisher(Bool, f'/{namespace}/pd_control_active', 10)
+        self.move_forward_publisher = self.create_publisher(String, f'/{namespace}/move_forward_start', 10)
+        # self.arrival_subscription = self.create_subscription(String, f'/{namespace}/pd_control_arrival', self.arrival_callback, 10)
+        self.arrival_subscription = self.create_subscription(String, f'/{namespace}/arrival', self.arrival_callback, 10)
 
     def listener_callback(self, msg):
-        self.get_logger().info(f'Received message: {msg.data}')
+        self.get_logger().info(f'Received message on {self.get_namespace()}/agv_command: {msg.data}')
         command = msg.data.strip().lower()
         if command.startswith("go to "):
             destination_key = command[6:].upper()
@@ -72,7 +70,7 @@ class MoveControlNode(Node):
     def get_result_callback(self, future):
         result = future.result().status
         if result == 4:  # 4 is the status code for succeeded
-            if not self.current_destination in ["A","D", "E"]:
+            if not self.current_destination in ["A", "D", "E"]:
                 self.publish_goal_reached(self.current_destination)
             else:
                 self.activate_move_forward()
@@ -80,10 +78,11 @@ class MoveControlNode(Node):
             self.get_logger().info('ゴールに到達できませんでした')
 
     def publish_goal_reached(self, destination_key):
+        agv_id = "agv1"  # ここでAGVのIDを設定する
         message = String()
-        message.data = f"I arrived {destination_key}!"
+        message.data = f"{agv_id} arrived {destination_key}"
         self.publisher_.publish(message)
-        self.get_logger().info(f'Published: I arrived {destination_key}!')
+        self.get_logger().info(f'Published: {agv_id} arrived {destination_key}!')
 
     def activate_move_forward(self):
         self.move_forward_publisher.publish(String(data="start"))
@@ -97,8 +96,6 @@ class MoveControlNode(Node):
 
     def arrival_callback(self, msg):
         self.publish_goal_reached(self.current_destination)
-    
-
 
     '''
     def cmd_vel_callback(self, msg):
@@ -112,9 +109,11 @@ class MoveControlNode(Node):
         else:
             self.cmd_vel_publisher.publish(msg)
     '''
+
 def main(args=None):
     rclpy.init(args=args)
-    node = MoveControlNode()
+    namespace = 'agv1'  # 設定するnamespace
+    node = MoveControlNode(namespace=namespace)
 
     # Keep the node spinning and accepting messages
     rclpy.spin(node)
@@ -124,11 +123,3 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
-'''
-#
-If you want to impose restrictions on going to a specific location, just add the following code.
-Furthermore, if you receive [/cmd_vel] and convert it to [/agv_cmd_vel], 
-you can output the adjusted speed /agv_cmd_vel from this node.
-#
-
-'''
