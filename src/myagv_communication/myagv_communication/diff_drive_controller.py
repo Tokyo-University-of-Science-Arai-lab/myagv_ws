@@ -16,15 +16,22 @@ class DiffDriveController(Node):
         vel_r = (twist.linear.x + d * twist.angular.z) * 240    # 385(0.95)
         vel_l = (twist.linear.x - d * twist.angular.z) * 234    # 232 
         
-        if 0 < vel_r < 20:
-            vel_r = 20
-        elif -20 < vel_r < 0:
-            vel_r = -20
+        # 30
+        if 0 < vel_r < 45:
+            vel_r = 45
+        elif -45 < vel_r < 0:
+            vel_r = -45
         
-        if 0 < vel_l < 20:
-            vel_l = 20
-        elif -20 < vel_l < 0:
-            vel_l = -20
+        if 0 < vel_l < 45:
+            vel_l = 45
+        elif -45 < vel_l < 0:
+            vel_l = -45
+        
+        if vel_r > 120:
+            vel_r = 120
+        
+        if vel_l > 120:
+            vel_l = 120
         
         '''
         if vel_r < 0:
@@ -53,3 +60,4 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+

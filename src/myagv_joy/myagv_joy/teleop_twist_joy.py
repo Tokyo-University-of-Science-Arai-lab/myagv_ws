@@ -22,8 +22,8 @@ class TeleopTwistJoy(Node):
             self.apriltag_publisher.publish(String(data="start"))
             self.get_logger().info("Apriltag start signal sent.")
         if self.publish_cmd_vel:
-            self.vel.linear.x = 0.3 * joy_msg.axes[1]
-            self.vel.angular.z = 0.8 * joy_msg.axes[3]
+            self.vel.linear.x = 0.3 * joy_msg.axes[1]   #0.2 0.3 0.25
+            self.vel.angular.z = 0.9 * joy_msg.axes[3]  #0.8 1.0 0.9
             self.publisher.publish(self.vel)
             self.get_logger().info("Velocity: Linear=%f" % (self.vel.linear.x))
             self.get_logger().info("Velocity: Angular=%f" % (self.vel.angular.z))
