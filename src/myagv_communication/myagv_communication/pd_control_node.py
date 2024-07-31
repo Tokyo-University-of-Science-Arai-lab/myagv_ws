@@ -11,10 +11,10 @@ class PDControlNode(Node):
         self.target_distance = 15  # 目標距離 7.91
         self.kp = 0.87  # 比例ゲイン
         self.kd = 0.07  # 微分ゲイン
-        self.cmd_vel_publisher = self.create_publisher(Twist, f'/{namespace}/cmd_vel', 10)
-        self.pd_control_subscription = self.create_subscription(String, f'/{namespace}/apriltag_start', self.pd_control_callback, 10)
-        self.node_start_publisher = self.create_publisher(String, f'/{namespace}/node_start', 10)  # 起動メッセージのためのパブリッシャーを作成
-        self.publisher_arrival = self.create_publisher(String, f'/{namespace}/arrival', 10)  # AGV到着メッセージのためのパブリッシャーを作成
+        self.cmd_vel_publisher = self.create_publisher(Twist, f'{namespace}/cmd_vel', 10)
+        self.pd_control_subscription = self.create_subscription(String, f'{namespace}/apriltag_start', self.pd_control_callback, 10)
+        self.node_start_publisher = self.create_publisher(String, f'{namespace}/node_start', 10)  # 起動メッセージのためのパブリッシャーを作成
+        self.publisher_arrival = self.create_publisher(String, f'{namespace}/arrival', 10)  # AGV到着メッセージのためのパブリッシャーを作成
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
         self.prev_error = 0.0
@@ -78,7 +78,7 @@ class PDControlNode(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    namespace = 'agv1'  # 設定するnamespace
+    namespace = ''  # 設定するnamespace
     node = PDControlNode(namespace=namespace)
     rclpy.spin(node)
     node.destroy_node()

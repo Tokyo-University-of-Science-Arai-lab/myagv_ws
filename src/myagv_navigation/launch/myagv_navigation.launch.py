@@ -71,12 +71,12 @@ def generate_launch_description():
 
     declare_namespace_cmd = DeclareLaunchArgument(
         'namespace',
-        default_value='',
+        default_value='', ##########ここへんこう
         description='Top-level namespace')
 
     declare_use_namespace_cmd = DeclareLaunchArgument(
         'use_namespace',
-        default_value='true',
+        default_value='false', ############true or false!!!!!!!!!!!!!!!!!!!1
         description='Whether to apply a namespace to the navigation stack')
 
     declare_slam_cmd = DeclareLaunchArgument(

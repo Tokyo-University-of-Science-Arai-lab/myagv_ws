@@ -12,8 +12,8 @@ class MoveControlNode(Node):
     def __init__(self, namespace=''):
         super().__init__('move_control_node', namespace=namespace)
         self._action_client = ActionClient(self, NavigateToPose, f'{namespace}/navigate_to_pose')
-        self.publisher_ = self.create_publisher(String, f'/{namespace}/agv_reach', 10)  # ['agv_arrival']
-        self.subscription = self.create_subscription(String, f'/{namespace}/agv_command', self.listener_callback, 10)  # 'agv_command'
+        self.publisher_ = self.create_publisher(String, f'{namespace}/agv_reach', 10)
+        self.subscription = self.create_subscription(String, f'{namespace}/agv_command', self.listener_callback, 10)  # 'agv_command'
         # self.cmd_vel_subscription = self.create_subscription(Twist, f'/{namespace}/cmd_vel', self.cmd_vel_callback, 10)
         # self.cmd_vel_publisher = self.create_publisher(Twist, f'/{namespace}/cmd_vel_limited', 10)
         self.current_destination = None  # Variable to store the current destination
@@ -27,10 +27,18 @@ class MoveControlNode(Node):
             "E": (1.78, -0.68, 1.0),
             "F": (-0.1, -1.97, 1.0)
         }
+        '''
+        "A": (1.11, 0.0313, 1.0),
+            "B": (-0.9, 1.9, 1.0),
+            "C": (0.8, 1.97, 1.0),
+            "D": (1.95, 0.85, 1.0),
+            "E": (1.78, -0.68, 1.0),
+            "F": (-0.1, -1.97, 1.0)
+        '''
         # self.pd_control_publisher = self.create_publisher(Bool, f'/{namespace}/pd_control_active', 10)
-        self.move_forward_publisher = self.create_publisher(String, f'/{namespace}/move_forward_start', 10)
+        self.move_forward_publisher = self.create_publisher(String, f'{namespace}/move_forward_start', 10)
         # self.arrival_subscription = self.create_subscription(String, f'/{namespace}/pd_control_arrival', self.arrival_callback, 10)
-        self.arrival_subscription = self.create_subscription(String, f'/{namespace}/arrival', self.arrival_callback, 10)
+        self.arrival_subscription = self.create_subscription(String, f'{namespace}/arrival', self.arrival_callback, 10)
 
     def listener_callback(self, msg):
         self.get_logger().info(f'Received message on {self.get_namespace()}/agv_command: {msg.data}')
@@ -113,7 +121,7 @@ class MoveControlNode(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    namespace = 'agv1'  # 設定するnamespace
+    namespace = ''  # 設定するnamespace
     node = MoveControlNode(namespace=namespace)
 
     # Keep the node spinning and accepting messages

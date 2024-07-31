@@ -7,10 +7,10 @@ from tf2_msgs.msg import TFMessage
 class MoveForwardNode(Node):
     def __init__(self, namespace=''):
         super().__init__('move_forward_node', namespace=namespace)
-        self.publisher_ = self.create_publisher(String, f'/{namespace}/apriltag_start', 10)
-        self.cmd_vel_publisher = self.create_publisher(Twist, f'/{namespace}/cmd_vel', 10)
+        self.publisher_ = self.create_publisher(String, f'{namespace}/apriltag_start', 10)
+        self.cmd_vel_publisher = self.create_publisher(Twist, f'{namespace}/cmd_vel', 10)
         self.subscription = self.create_subscription(TFMessage,'/tf', self.tf_callback, 10)
-        self.move_forward_subscription = self.create_subscription(String, f'/{namespace}/move_forward_start', self.move_forward_callback, 10)
+        self.move_forward_subscription = self.create_subscription(String, f'{namespace}/move_forward_start', self.move_forward_callback, 10)
         self.move_forward_active = False
         self.timer = self.create_timer(0.1, self.control_loop)  # 0.1秒ごとに制御ループを実行
 
@@ -50,7 +50,7 @@ class MoveForwardNode(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    namespace = 'agv1'  # デフォルト値
+    namespace = ''  # デフォルト値
     node = MoveForwardNode(namespace=namespace)
     rclpy.spin(node)
     node.destroy_node()

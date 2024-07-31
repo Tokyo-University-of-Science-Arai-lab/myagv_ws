@@ -1,20 +1,17 @@
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, TransformStamped
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import TransformStamped
-#from tf_transformations import quaternion_from_euler
+from tf2_msgs.msg import TFMessage
 from transforms3d.euler import euler2quat as quaternion_from_euler
-from tf2_ros import TransformBroadcaster
 import math
-import time
 
 class OdometryPublisher(Node):
     def __init__(self):
         super().__init__('odometry_publisher')
-        self.odom_pub = self.create_publisher(Odometry, 'odom', 1)
+        self.odom_pub = self.create_publisher(Odometry, '/odom', 1)  # Change to 'agv1/odom'
+        self.tf_pub = self.create_publisher(TFMessage, '/tf', 1)  # Create publisher for 'agv1/tf'
         self.subscriber = self.create_subscription(Twist, 'cmd_vel_fb', self.velocity_callback, 1)
-        self.odom_broadcaster = TransformBroadcaster(self)
         
         self.x = 0.0
         self.y = 0.0
@@ -54,11 +51,11 @@ class OdometryPublisher(Node):
         odom_quat = quaternion_from_euler(0, 0, self.th)
         self.get_logger().info("Quaternion: x = %f, y = %f, z = %f, w = %f" % (odom_quat[1], odom_quat[2], odom_quat[3], odom_quat[0]))
         
-        # Publish transform over tf
+        # Create TransformStamped message
         odom_trans = TransformStamped()
         odom_trans.header.stamp = current_time.to_msg()
-        odom_trans.header.frame_id = 'odom'
-        odom_trans.child_frame_id = 'base_link' #base_footprint
+        odom_trans.header.frame_id = 'odom'  # Keep as 'odom'
+        odom_trans.child_frame_id = 'base_link'  # Keep as 'base_link'
         
         odom_trans.transform.translation.x = self.x
         odom_trans.transform.translation.y = self.y
@@ -68,12 +65,14 @@ class OdometryPublisher(Node):
         odom_trans.transform.rotation.z = odom_quat[3]
         odom_trans.transform.rotation.w  = odom_quat[0]
         
-        self.odom_broadcaster.sendTransform(odom_trans)
+        # Create TFMessage and publish it
+        tf_message = TFMessage(transforms=[odom_trans])
+        self.tf_pub.publish(tf_message)
         
         # Publish the odometry message over ROS
         odom = Odometry()
         odom.header.stamp = current_time.to_msg()
-        odom.header.frame_id = 'odom'
+        odom.header.frame_id = '/odom'  # Change to 'agv1/odom'
         
         # Set the position
         odom.pose.pose.position.x = self.x
@@ -85,7 +84,7 @@ class OdometryPublisher(Node):
         odom.pose.pose.orientation.w = odom_quat[0]
         
         # Set the velocity
-        odom.child_frame_id = 'base_link'   #base_footprint
+        odom.child_frame_id = 'base_link'  # Keep as 'base_link'
         odom.twist.twist.linear.x = self.vx
         odom.twist.twist.linear.y = self.vy
         odom.twist.twist.angular.z = self.vth

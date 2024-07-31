@@ -22,13 +22,13 @@ def generate_launch_description():
     if not os.path.exists(camera_info_file):
         raise FileNotFoundError(f"Camera info file not found: {camera_info_file}")
     
-    namespace = LaunchConfiguration('namespace', default='agv1')
+    namespace = LaunchConfiguration('namespace', default='') #########ここ変更！！
     device = LaunchConfiguration('device', default='0')
 
     return LaunchDescription([
         DeclareLaunchArgument(
             'namespace',
-            default_value='agv1',
+            default_value='', ###########ここも変更
             description='Namespace for the nodes'
         ),
         DeclareLaunchArgument(
@@ -49,7 +49,7 @@ def generate_launch_description():
                     name='camera',
                     namespace='usb_cam',
                     parameters=[{
-                        'video_device': LaunchConfiguration('device', default='/dev/video0'),
+                        'video_device': LaunchConfiguration('device', default='/dev/video2'),
                         'camera_info_url': f'file://{camera_info_file}'
                     }],
                     extra_arguments=[{'use_intra_process_comms': True}]
@@ -60,8 +60,8 @@ def generate_launch_description():
                     name='rectify',
                     namespace=namespace,
                     remappings=[
-                        ('image', '/agv1/image_raw'),
-                        ('camera_info', '/agv1/camera_info')
+                        ('image', '/image_raw'), #############!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        ('camera_info', '/camera_info') #############!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     ],
                     extra_arguments=[{'use_intra_process_comms': True}]
                 ),
@@ -71,8 +71,8 @@ def generate_launch_description():
                     name='apriltag',
                     namespace=namespace,
                     remappings=[
-                        ('/apriltag/image_rect', '/agv1/image_raw'),
-                        ('/apriltag/camera_info', '/agv1/camera_info')
+                        ('/apriltag/image_rect', '/image_raw'), #############!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        ('/apriltag/camera_info', '/camera_info') #############!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     ],
                     extra_arguments=[{'use_intra_process_comms': True}]
                 ),
