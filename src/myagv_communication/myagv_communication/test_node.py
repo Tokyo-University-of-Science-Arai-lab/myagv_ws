@@ -6,7 +6,7 @@ class MoveForwardStartPublisher(Node):
     def __init__(self):
         super().__init__('test_node')
         self.agv_command_publisher = self.create_publisher(String, '/agv_command', 10)
-        self.move_forward_publisher = self.create_publisher(String, '/agv1/move_forward_start', 10)
+        self.move_forward_publisher = self.create_publisher(String, '/move_forward_start', 10)
         self.publisher_arrival = self.create_publisher(String, '/agv1/arrival', 10)
         self.arrival_count = 0
         self.get_logger().info('Node is ready to receive input. Type "1" to send AGV command, "2" to publish "start" on /move_forward_start, "3" to publish on /arrival, or "exit" to quit.')
@@ -15,7 +15,7 @@ class MoveForwardStartPublisher(Node):
         while rclpy.ok():
             user_input = input("Enter '1' to send AGV command, '2' to publish 'start', '3' to publish arrival, 'exit' to quit: ")
             if user_input == '1':
-                self.publish_agv_command('agv1', 'A')  # 'agv1 move to A'をパブリッシュ
+                self.publish_agv_command('agv1', 'F')  # 'agv1 move to A'をパブリッシュ
             elif user_input == '2':
                 self.publish_move_forward_message('start')  # '/move_forward_start'に'start'をパブリッシュ
             elif user_input == '3':

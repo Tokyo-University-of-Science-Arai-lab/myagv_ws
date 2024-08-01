@@ -20,12 +20,12 @@ class MoveControlNode(Node):
 
         # Define destination coordinates
         self.destinations = {
-            "A": (0.581, 0.028, -3.112),
-            "B": (0.581, 0.028, -3.112),
-            "C": (0.8, 1.97, 1.0),
-            "D": (1.95, 0.85, 1.0),
-            "E": (1.78, -0.68, 1.0),
-            "F": (-0.1, -1.97, 1.0)
+            "A": (0.769, 1.214, 1.440),
+            "B": (0.774, 0.280, 1.488),
+            "C": (-2.695, 0.070, -0.091),
+            "D": (-5.418, 0.591, -1.712),
+            "E": (-4.482, 2.490, 3.067),
+            "F": (0.115, 2.141, 3.086),
         }
         '''
         "A": (1.11, 0.0313, 1.0),
@@ -45,7 +45,10 @@ class MoveControlNode(Node):
         command = msg.data.strip().lower()
         if command.startswith("go to "):
             destination_key = command[6:].upper()
-            if destination_key in self.destinations:
+
+            if destination_key == "E":
+                self.activate_move_forward()
+            elif destination_key in self.destinations:
                 self.current_destination = destination_key  # Save your current destination
                 x, y, z = self.destinations[destination_key]
                 self.get_logger().info(f'Navigating to {destination_key} at coordinates ({x}, {y}, {z})')
@@ -78,7 +81,7 @@ class MoveControlNode(Node):
     def get_result_callback(self, future):
         result = future.result().status
         if result == 4:  # 4 is the status code for succeeded
-            if not self.current_destination in ["A", "D", "E"]:
+            if not self.current_destination == "F":
                 self.publish_goal_reached(self.current_destination)
             else:
                 self.activate_move_forward()
