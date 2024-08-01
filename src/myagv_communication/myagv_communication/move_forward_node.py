@@ -31,7 +31,7 @@ class MoveForwardNode(Node):
         if not self.move_forward_active:
             return
         cmd_vel_msg = Twist()
-        cmd_vel_msg.linear.x = 0.2
+        cmd_vel_msg.linear.x = 0.25
         self.cmd_vel_publisher.publish(cmd_vel_msg)
         self.get_logger().info('Publishing cmd_vel: linear.x=0.2')
 

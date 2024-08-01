@@ -13,15 +13,15 @@ class MoveControlNode(Node):
         super().__init__('move_control_node', namespace=namespace)
         self._action_client = ActionClient(self, NavigateToPose, f'{namespace}/navigate_to_pose')
         self.publisher_ = self.create_publisher(String, f'{namespace}/agv_reach', 10)
-        self.subscription = self.create_subscription(String, f'{namespace}/agv_command', self.listener_callback, 10)  # 'agv_command'
+        self.subscription = self.create_subscription(String, f'{namespace}/command', self.listener_callback, 10)  # 'agv_command'
         # self.cmd_vel_subscription = self.create_subscription(Twist, f'/{namespace}/cmd_vel', self.cmd_vel_callback, 10)
         # self.cmd_vel_publisher = self.create_publisher(Twist, f'/{namespace}/cmd_vel_limited', 10)
         self.current_destination = None  # Variable to store the current destination
 
         # Define destination coordinates
         self.destinations = {
-            "A": (1.11, 0.0313, 1.0),
-            "B": (-0.9, 1.9, 1.0),
+            "A": (0.581, 0.028, -3.112),
+            "B": (0.581, 0.028, -3.112),
             "C": (0.8, 1.97, 1.0),
             "D": (1.95, 0.85, 1.0),
             "E": (1.78, -0.68, 1.0),

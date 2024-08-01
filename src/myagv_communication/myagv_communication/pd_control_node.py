@@ -8,7 +8,7 @@ from std_msgs.msg import String
 class PDControlNode(Node):
     def __init__(self, namespace=''):
         super().__init__('pd_control_node', namespace=namespace)
-        self.target_distance = 15  # 目標距離 7.91
+        self.target_distance = 7.91  # 目標距離 7.91
         self.kp = 0.87  # 比例ゲイン
         self.kd = 0.07  # 微分ゲイン
         self.cmd_vel_publisher = self.create_publisher(Twist, f'{namespace}/cmd_vel', 10)
@@ -55,7 +55,7 @@ class PDControlNode(Node):
             if distance <= 0.005 or abs(cmd_vel_msg.linear.x) <= 0.08:
                 cmd_vel_msg.linear.x = 0.0
                 self.arrival_count += 1  # 到着回数をインクリメント
-                self.publish_arrival('agv1', 'B' if self.arrival_count % 2 != 0 else 'C')  # 各agvの番号に変える
+                self.publish_arrival('agv1', 'B' if self.arrival_count % 2 != 0 else 'C')  # 各agvの番号に変える、apriltagが増えたら修正
                 self.pd_control_active = False
             
             self.cmd_vel_publisher.publish(cmd_vel_msg)
