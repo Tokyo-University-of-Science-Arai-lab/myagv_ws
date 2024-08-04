@@ -1,0 +1,75 @@
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import String
+from geometry_msgs.msg import Twist
+from tf2_msgs.msg import TFMessage
+
+class MoveForwardNode(Node):
+    def __init__(self, namespace=''):
+        super().__init__('move_forward_node', namespace=namespace)
+        self.publisher_ = self.create_publisher(String, f'{namespace}/apriltag_start', 10)
+        self.cmd_vel_publisher = self.create_publisher(Twist, f'{namespace}/cmd_vel', 10)
+        self.subscription = self.create_subscription(TFMessage,'/tf', self.tf_callback, 10)
+        self.move_forward_subscription = self.create_subscription(String, f'{namespace}/move_forward_start', self.move_forward_callback, 10)
+        self.command_publisher = self.create_publisher(String, '/command', 10)
+        self.move_forward_active = False
+        self.timer = self.create_timer(0.1, self.control_loop)  # 0.1秒ごとに制御ループを実行
+        self.callback_count = 2 ####実際は0
+
+    def tf_callback(self, msg):
+        self.count = 0
+        if not self.move_forward_active:
+            return
+        for transform in msg.transforms:
+            if (self.callback_count % 3 == 0 and transform.child_frame_id == 'tag36h11:0') or (self.callback_count % 3 == 1 and transform.child_frame_id == 'tag36h11:2'):
+                self.publish_start_message()
+                self.stop_moving_forward()
+                self.callback_count += 1
+            elif (self.callback_count % 3 == 2 and transform.child_frame_id == 'tag36h11:0'):
+                self.stop_moving_forward()
+                if self.count == 0:
+                    command_msg = String()
+                    position = 'G'
+                    command_msg.data = f'go to {position}'
+                    self.command_publisher.publish(command_msg)  # Publishing to /command
+                    self.get_logger().info(f'Sending command to : go to {position}')
+                self.count += 1
+                self.callback_count += 1
+
+    def move_forward_callback(self, msg):
+        if msg.data == 'start':
+            self.get_logger().info('Received start message, enabling move forward')
+            self.move_forward_active = True
+
+    def control_loop(self):
+        if not self.move_forward_active:
+            return
+        cmd_vel_msg = Twist()
+        cmd_vel_msg.linear.x = 0.28
+        self.cmd_vel_publisher.publish(cmd_vel_msg)
+        self.get_logger().info('Publishing cmd_vel: linear.x=0.28')
+
+    def stop_moving_forward(self):
+        self.move_forward_active = False
+        cmd_vel_msg = Twist()
+        cmd_vel_msg.linear.x = 0.0
+        self.cmd_vel_publisher.publish(cmd_vel_msg)
+        self.get_logger().info('AprilTag recognized, stopping cmd_vel')
+
+    def publish_start_message(self):
+        msg = String()
+        msg.data = 'start'
+        self.publisher_.publish(msg)
+        self.get_logger().info(f'Publishing: "start" to /{self.get_namespace()}/apriltag_start')
+    
+
+def main(args=None):
+    rclpy.init(args=args)
+    namespace = ''  # デフォルト値
+    node = MoveForwardNode(namespace=namespace)
+    rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()

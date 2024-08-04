@@ -1,11 +1,12 @@
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped
 from rclpy.action import ActionClient
 from nav2_msgs.action import NavigateToPose
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
+from tf2_msgs.msg import TFMessage
 
 class MoveControlNode(Node):
 
@@ -14,26 +15,39 @@ class MoveControlNode(Node):
         self._action_client = ActionClient(self, NavigateToPose, f'{namespace}/navigate_to_pose')
         self.publisher_ = self.create_publisher(String, f'{namespace}/agv_reach', 10)
         self.subscription = self.create_subscription(String, f'{namespace}/command', self.listener_callback, 10)  # 'agv_command'
+        self.subscription = self.create_subscription(TFMessage, '/tf', self.tf_callback, 10)
+        self.initialpose_publisher = self.create_publisher(PoseWithCovarianceStamped, '/initialpose', 10)
         # self.cmd_vel_subscription = self.create_subscription(Twist, f'/{namespace}/cmd_vel', self.cmd_vel_callback, 10)
         # self.cmd_vel_publisher = self.create_publisher(Twist, f'/{namespace}/cmd_vel_limited', 10)
         self.current_destination = None  # Variable to store the current destination
+        self.current_goal_handle = None
 
         # Define destination coordinates
         self.destinations = {
-            "A": (0.769, 1.214, 1.440),
+        
+            "A": (-3.205, 4.000, 0.744), 
+            "B": (-6.025, 5.111, -0.872),
+            "C": (-7.587, 6.615, -0.774),
+            "D": (-8.266, 8.698, -2.366),
+            "E": (-4.482, 2.490, 3.067),
+            "F": (-2.991, 5.177, 2.136),
+            "G": (-8.266, 8.698, -2.366),
+        }
+        '''
+        "A": (0.769, 1.214, 1.440),
             "B": (0.774, 0.280, 1.488),
             "C": (-2.695, 0.070, -0.091),
             "D": (-5.418, 0.591, -1.712),
             "E": (-4.482, 2.490, 3.067),
             "F": (0.115, 2.141, 3.086),
-        }
-        '''
-        "A": (1.11, 0.0313, 1.0),
-            "B": (-0.9, 1.9, 1.0),
-            "C": (0.8, 1.97, 1.0),
-            "D": (1.95, 0.85, 1.0),
-            "E": (1.78, -0.68, 1.0),
-            "F": (-0.1, -1.97, 1.0)
+            
+            "A": (0.769, 1.214, 1.440), 
+            "B": (0.774, 0.280, 1.488),
+            "C": (-2.695, 0.070, -0.091),
+            "D": (-5.418, 0.591, -1.712),
+            "E": (-4.482, 2.490, 3.067),
+            "F": (0.436, 2.095, 2.705),
+            #"F": (0.845, 1.406, 1.470), ##0.845 1.406 1.470
         '''
         # self.pd_control_publisher = self.create_publisher(Bool, f'/{namespace}/pd_control_active', 10)
         self.move_forward_publisher = self.create_publisher(String, f'{namespace}/move_forward_start', 10)
@@ -41,12 +55,12 @@ class MoveControlNode(Node):
         self.arrival_subscription = self.create_subscription(String, f'{namespace}/arrival', self.arrival_callback, 10)
 
     def listener_callback(self, msg):
-        self.get_logger().info(f'Received message on {self.get_namespace()}/agv_command: {msg.data}')
+        self.get_logger().info(f'Received message on {self.get_namespace()}/command: {msg.data}')
         command = msg.data.strip().lower()
         if command.startswith("go to "):
             destination_key = command[6:].upper()
-
-            if destination_key == "E":
+            self.get_logger().info(f'current destination key: {destination_key}')
+            if destination_key == "E" or destination_key == "D":
                 self.activate_move_forward()
             elif destination_key in self.destinations:
                 self.current_destination = destination_key  # Save your current destination
@@ -67,16 +81,21 @@ class MoveControlNode(Node):
         self._action_client.wait_for_server()
         self._send_goal_future = self._action_client.send_goal_async(goal_msg)
         self._send_goal_future.add_done_callback(self.goal_response_callback)
+        self.get_logger().info(f'goal sent')
 
     def goal_response_callback(self, future):
-        goal_handle = future.result()
-        if not goal_handle.accepted:
-            self.get_logger().info('Goal rejected :(')
-            return
+        try:
+            self.current_goal_handle = future.result()
+            self.get_logger().info('Goal handle received :(')
+            if not self.current_goal_handle.accepted:
+                self.get_logger().info('Goal rejected :(')
+                return
 
-        self.get_logger().info('Goal accepted :)')
-        self._get_result_future = goal_handle.get_result_async()
-        self._get_result_future.add_done_callback(self.get_result_callback)
+            self.get_logger().info('Goal accepted :)')
+            self._get_result_future = self.current_goal_handle.get_result_async()
+            self._get_result_future.add_done_callback(self.get_result_callback)
+        except Exception as e:
+            self.get_logger().info('Failed to get result :(')
 
     def get_result_callback(self, future):
         result = future.result().status
@@ -91,13 +110,18 @@ class MoveControlNode(Node):
     def publish_goal_reached(self, destination_key):
         agv_id = "agv1"  # ここでAGVのIDを設定する
         message = String()
+        if destination_key == 'G':
+            destination_key = 'D'
         message.data = f"{agv_id} arrived {destination_key}"
         self.publisher_.publish(message)
         self.get_logger().info(f'Published: {agv_id} arrived {destination_key}!')
+        self.cancel_navigation()
+        self.get_logger().info(f'cancel navigation ocurred')
 
     def activate_move_forward(self):
         self.move_forward_publisher.publish(String(data="start"))
-        self.get_logger().info('pd_control start signal sent.')
+        self.get_logger().info('move forward start signal sent.')
+        
         '''
         self.get_logger().info('PD Control activated.')
         pd_control_msg = Bool()
@@ -106,8 +130,26 @@ class MoveControlNode(Node):
         '''
 
     def arrival_callback(self, msg):
-        self.current_destination = 'B' ##ここは試験用。消す！！！！！
+        #self.current_destination = 'B' ##ここは試験用。消す！！！！！
         self.publish_goal_reached(self.current_destination)
+        
+    def tf_callback(self, msg):
+    	for transform in msg.transforms:
+            if 'tag36h11:1' in transform.child_frame_id:
+                self.get_logger().info('Tag36h11 detected, triggering publish_goal_reached.')
+                self.publish_goal_reached(self.current_destination)
+
+    def cancel_navigation(self):
+        self.get_logger().info(f'cancel navigation ocurred2')
+        if self.current_goal_handle is not None:
+            self.get_logger().info(f'cancelling goal.')
+            cancel_goal_future = self.current_goal_handle.cancel_goal_async()
+            cancel_goal_future.add_done_callback(self.cancel_done_callback)   
+        else:
+            self.get_logger().info(f'No active goal to cancel.')
+
+    def cancel_done_callback(self, future):
+        self.get_logger().info('Navigaton cancelled.')
 
     '''
     def cmd_vel_callback(self, msg):

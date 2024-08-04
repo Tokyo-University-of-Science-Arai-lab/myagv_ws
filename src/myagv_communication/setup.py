@@ -32,6 +32,8 @@ setup(
             'test_node = myagv_communication.test_node:main',
             "trans_command_node = myagv_communication.trans_command_node:main",
             "distance_node = myagv_communication.distance:main",
+            "second_move_forward_node = myagv_communication.second_move_forward_node:main",
+            "second_pd_control_node = myagv_communication.second_pd_control_node:main",
         ],
     },
 )
