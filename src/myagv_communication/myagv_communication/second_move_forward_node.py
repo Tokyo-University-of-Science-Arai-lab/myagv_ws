@@ -14,10 +14,11 @@ class MoveForwardNode(Node):
         self.command_publisher = self.create_publisher(String, '/command', 10)
         self.move_forward_active = False
         self.timer = self.create_timer(0.1, self.control_loop)  # 0.1秒ごとに制御ループを実行
-        self.callback_count = 2 ####実際は0
+        self.callback_count = 0 ####実際は0
 
     def tf_callback(self, msg):
         self.count = 0
+        #self.get_logger().info(f'callback count = {self.callback_count}')
         if not self.move_forward_active:
             return
         for transform in msg.transforms:
@@ -45,9 +46,12 @@ class MoveForwardNode(Node):
         if not self.move_forward_active:
             return
         cmd_vel_msg = Twist()
-        cmd_vel_msg.linear.x = 0.28
+        cmd_vel_msg.linear.x = 0.35
+        if self.callback_count % 3 == 2 or self.callback_count % 3 == 0:
+            cmd_vel_msg.linear.x = 0.28
+
         self.cmd_vel_publisher.publish(cmd_vel_msg)
-        self.get_logger().info('Publishing cmd_vel: linear.x=0.28')
+        self.get_logger().info(f'Publishing cmd_vel: linear.x = {cmd_vel_msg.linear.x}')
 
     def stop_moving_forward(self):
         self.move_forward_active = False

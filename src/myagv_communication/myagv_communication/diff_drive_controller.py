@@ -32,6 +32,12 @@ class DiffDriveController(Node):
         
         if vel_l > 120:
             vel_l = 120
+
+        if vel_r < -120:
+            vel_r = -120
+        
+        if vel_l < -120:
+            vel_l = -120
         
         '''
         if vel_r < 0:

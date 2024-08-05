@@ -21,7 +21,7 @@ class PDControlNode(Node):
         self.prev_time = self.get_clock().now()
         self.timer = self.create_timer(0.1, self.control_loop)
         self.pd_control_active = False  # PDループの制御用フラグ
-        self.arrival_count = 0  # AGVの到着回数をカウントする変数
+        self.arrival_count = 0  # AGVの到着回数をカウントする変数 実際は0
         self.publish_start_message()  # ノードが起動したことを発信
 
     def pd_control_callback(self, msg):
@@ -42,7 +42,7 @@ class PDControlNode(Node):
             tag_frame = 'tag36h11:0'
             trans = self.tf_buffer.lookup_transform(cam_frame, tag_frame, now, timeout=rclpy.duration.Duration(seconds=1.0))
             distance = math.sqrt(trans.transform.translation.x ** 2 + trans.transform.translation.y ** 2 + trans.transform.translation.z ** 2)
-            self.get_logger().info(f"distance={distance}")
+            #self.get_logger().info(f"distance={distance}")
             error = self.target_distance - distance
             current_time = self.get_clock().now()
             dt = (current_time - self.prev_time).nanoseconds / 1e9
@@ -50,12 +50,15 @@ class PDControlNode(Node):
             control_signal = -1 * (self.kp * error + self.kd * derivative)
             control_signal = min(0.4, control_signal)
             cmd_vel_msg = Twist()
+            #cmd_vel_msg.linear.x = control_signal
             cmd_vel_msg.linear.x = 0.0
+            self.get_logger().info(f"stop!")
+            
             
             if distance <= 0.005 or abs(cmd_vel_msg.linear.x) <= 0.08:
                 cmd_vel_msg.linear.x = 0.0
                 self.arrival_count += 1  # 到着回数をインクリメント
-                self.publish_arrival('agv1', 'F' if self.arrival_count % 2 != 0 else 'E')  # 各agvの番号に変える、apriltagが増えたら修正
+                self.publish_arrival('agv1', 'F' if self.arrival_count % 2 == 1 else 'E')  # 変更点！！ 各agvの番号に変える、apriltagが増えたら修正
                 self.pd_control_active = False
             
             self.cmd_vel_publisher.publish(cmd_vel_msg)

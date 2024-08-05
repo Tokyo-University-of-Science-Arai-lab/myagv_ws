@@ -7,6 +7,8 @@ from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
 from tf2_msgs.msg import TFMessage
+import time
+import math
 
 class MoveControlNode(Node):
 
@@ -17,6 +19,7 @@ class MoveControlNode(Node):
         self.subscription = self.create_subscription(String, f'{namespace}/command', self.listener_callback, 10)  # 'agv_command'
         self.subscription = self.create_subscription(TFMessage, '/tf', self.tf_callback, 10)
         self.initialpose_publisher = self.create_publisher(PoseWithCovarianceStamped, '/initialpose', 10)
+        self.curve_publisher = self.create_publisher(String, 'fcurve_command', 10)
         # self.cmd_vel_subscription = self.create_subscription(Twist, f'/{namespace}/cmd_vel', self.cmd_vel_callback, 10)
         # self.cmd_vel_publisher = self.create_publisher(Twist, f'/{namespace}/cmd_vel_limited', 10)
         self.current_destination = None  # Variable to store the current destination
@@ -25,13 +28,13 @@ class MoveControlNode(Node):
         # Define destination coordinates
         self.destinations = {
         
-            "A": (-3.205, 4.000, 0.744), 
-            "B": (-6.025, 5.111, -0.872),
-            "C": (-7.587, 6.615, -0.774),
-            "D": (-8.266, 8.698, -2.366),
-            "E": (-4.482, 2.490, 3.067),
-            "F": (-2.991, 5.177, 2.136),
-            "G": (-8.266, 8.698, -2.366),
+            "A": (-2.600, -7.143, -0.500), ##(-3.205, 4.000, 0.744) 
+            "B": (-3.094, -5.523, -2.099),
+            "C": (-1.954, -3.349, -2.117),
+            "D": (-0.693, -0.972, -2.079),
+            "E": (1.253, -2.273, 1.120),
+            "F": (-0.843, -6.241, 0.981), ###(-3.073, 5.387, 2.380)
+            "G": (-8.558, 7.453, -0.785), ###(-8.266, 8.698, -2.366)
         }
         '''
         "A": (0.769, 1.214, 1.440),
@@ -60,8 +63,11 @@ class MoveControlNode(Node):
         if command.startswith("go to "):
             destination_key = command[6:].upper()
             self.get_logger().info(f'current destination key: {destination_key}')
-            if destination_key == "E" or destination_key == "D":
+            if destination_key == "E" or destination_key =="D":
                 self.activate_move_forward()
+            elif destination_key =="F":
+                self.publish_fcurve_command()
+                self.get_logger().info('fcurve pub')
             elif destination_key in self.destinations:
                 self.current_destination = destination_key  # Save your current destination
                 x, y, z = self.destinations[destination_key]
@@ -130,14 +136,26 @@ class MoveControlNode(Node):
         '''
 
     def arrival_callback(self, msg):
-        #self.current_destination = 'B' ##ここは試験用。消す！！！！！
+        data = msg.data.strip()
+        agv_id = data.split()[0]
+        position = data[-1]
+        self.get_logger().info(f'Arrival message received : AGV ID = {agv_id}, Position = {position}')
+        self.current_destination = position
+        if position == 'E':
+            self.set_initial_pose(1.253, -2.273, 1.120) ## ここで2DPoseEsimate
         self.publish_goal_reached(self.current_destination)
         
     def tf_callback(self, msg):
     	for transform in msg.transforms:
             if 'tag36h11:1' in transform.child_frame_id:
                 self.get_logger().info('Tag36h11 detected, triggering publish_goal_reached.')
-                self.publish_goal_reached(self.current_destination)
+                if not self.current_destination == "F":
+                    self.publish_goal_reached(self.current_destination)
+                else:
+                    self.cancel_navigation()
+                    self.activate_move_forward()
+                    time.sleep(8.0)
+                
 
     def cancel_navigation(self):
         self.get_logger().info(f'cancel navigation ocurred2')
@@ -163,6 +181,28 @@ class MoveControlNode(Node):
         else:
             self.cmd_vel_publisher.publish(msg)
     '''
+
+    def set_initial_pose(self, x, y, yaw):
+        initial_pose_msg = PoseWithCovarianceStamped()
+        initial_pose_msg.header.frame_id = 'map'
+        initial_pose_msg.header.stamp = self.get_clock().now().to_msg()
+        initial_pose_msg.pose.pose.position.x = x
+        initial_pose_msg.pose.pose.position.y = y
+        initial_pose_msg.pose.pose.orientation.z = math.sin(yaw/2)
+        initial_pose_msg.pose.pose.orientation.w = math.cos(yaw/2)
+
+        initial_pose_msg.pose.covariance[0] = 0.5
+        initial_pose_msg.pose.covariance[7] = 0.5
+        initial_pose_msg.pose.covariance[35] = 0.1
+
+        self.initialpose_publisher.publish(initial_pose_msg)
+        self.get_logger().info(f'Set initial pose to ({x}, {y}, {yaw})')
+
+    def publish_fcurve_command(self):
+        command_msg = String()
+        command_msg.data = 'start'
+        self.curve_publisher.publish(command_msg)
+        self.get_logger().info('Published message: Start')
 
 def main(args=None):
     rclpy.init(args=args)
