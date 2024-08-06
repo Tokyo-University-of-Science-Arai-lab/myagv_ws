@@ -63,7 +63,7 @@ class MoveControlNode(Node):
         if command.startswith("go to "):
             destination_key = command[6:].upper()
             self.get_logger().info(f'current destination key: {destination_key}')
-            if destination_key == "E" or destination_key =="D":
+            if destination_key in ["E", "D"]:
                 self.activate_move_forward()
             elif destination_key =="F":
                 self.publish_fcurve_command()
@@ -148,13 +148,18 @@ class MoveControlNode(Node):
     def tf_callback(self, msg):
     	for transform in msg.transforms:
             if 'tag36h11:1' in transform.child_frame_id:
-                self.get_logger().info('Tag36h11 detected, triggering publish_goal_reached.')
-                if not self.current_destination == "F":
+                self.get_logger().info('Tag36h11:1 detected.')
+                if self.current_destination in ["D", "B"]:
                     self.publish_goal_reached(self.current_destination)
                 else:
+                    self.get_logger().info('Tag36h11 detected, triggering publish_goal_reached.')
                     self.cancel_navigation()
                     self.activate_move_forward()
                     time.sleep(8.0)
+            elif 'tag36h11:2' in transform.child_frame_id:
+                self.get_logger().info('Tag36h11:2 detected.')
+                if self.current_destination in ["C", "A"]:
+                    self.publish_goal_reached(self.current_destination)
                 
 
     def cancel_navigation(self):

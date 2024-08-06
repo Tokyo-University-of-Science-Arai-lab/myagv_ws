@@ -26,15 +26,15 @@ class TransCommandNode(Node):
     def listener_callback(self, msg):
         parts = msg.data.split()
         agv_id, _, _, position = parts
-
-        command_msg = String()
-        command_msg.data = f'go to {position}'
-        self.command_publisher.publish(command_msg)  # Publishing to /command
-        self.get_logger().info(f'Sending command to : go to {position}')
+        if agv_id == 'agv1':
+            command_msg = String()
+            command_msg.data = f'go to {position}'
+            self.command_publisher.publish(command_msg)  # Publishing to /command
+            self.get_logger().info(f'Sending command to : go to {position}')
 
     def agv_command_callback(self, msg):
         arrival_msg = String()
-        arrival_msg.data = f'arrived at {msg.data.split()[-1]}'
+        arrival_msg.data = f'{msg.data.split()[0]} {msg.data.split()[-1]}'
         self.arrival_publisher.publish(arrival_msg)
         self.get_logger().info(f'Publishing on /agv_arrival: {arrival_msg.data}')
 
