@@ -34,6 +34,8 @@ setup(
             "distance_node = myagv_communication.distance:main",
             "second_move_forward_node = myagv_communication.second_move_forward_node:main",
             "second_pd_control_node = myagv_communication.second_pd_control_node:main",
+            'testapriltag = myagv_communication.testapriltag:main',
+            'tag_avoid_node = myagv_communication.tag_avoid_node:main',
         ],
     },
 )

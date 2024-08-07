@@ -20,6 +20,8 @@ class MoveControlNode(Node):
         self.subscription = self.create_subscription(TFMessage, '/tf', self.tf_callback, 10)
         self.initialpose_publisher = self.create_publisher(PoseWithCovarianceStamped, '/initialpose', 10)
         self.curve_publisher = self.create_publisher(String, 'fcurve_command', 10)
+        self.tag_avoid_publisher = self.create_publisher(String, '/tag_avoid', 10)
+        self.subscription = self.create_subscription(String, '/avoid_complete', self.publish_goal_reached, 10)
         # self.cmd_vel_subscription = self.create_subscription(Twist, f'/{namespace}/cmd_vel', self.cmd_vel_callback, 10)
         # self.cmd_vel_publisher = self.create_publisher(Twist, f'/{namespace}/cmd_vel_limited', 10)
         self.current_destination = None  # Variable to store the current destination
@@ -55,7 +57,8 @@ class MoveControlNode(Node):
         # self.pd_control_publisher = self.create_publisher(Bool, f'/{namespace}/pd_control_active', 10)
         self.move_forward_publisher = self.create_publisher(String, f'{namespace}/move_forward_start', 10)
         # self.arrival_subscription = self.create_subscription(String, f'/{namespace}/pd_control_arrival', self.arrival_callback, 10)
-        self.arrival_subscription = self.create_subscription(String, f'{namespace}/arrival', self.arrival_callback, 10)
+        self.arrival_subscription = self.create_subscription(String, f'{namespace}/arrival', self.tag_avoid_callback, 10)
+        self.tag_avoid_count = 0
 
     def listener_callback(self, msg):
         self.get_logger().info(f'Received message on {self.get_namespace()}/command: {msg.data}')
@@ -121,8 +124,7 @@ class MoveControlNode(Node):
         message.data = f"{agv_id} arrived {destination_key}"
         self.publisher_.publish(message)
         self.get_logger().info(f'Published: {agv_id} arrived {destination_key}!')
-        self.cancel_navigation()
-        self.get_logger().info(f'cancel navigation ocurred')
+        
 
     def activate_move_forward(self):
         self.move_forward_publisher.publish(String(data="start"))
@@ -150,16 +152,34 @@ class MoveControlNode(Node):
             if 'tag36h11:1' in transform.child_frame_id:
                 self.get_logger().info('Tag36h11:1 detected.')
                 if self.current_destination in ["D", "B"]:
-                    self.publish_goal_reached(self.current_destination)
+                    self.cancel_navigation()
+                    self.get_logger().info(f'cancel navigation ocurred')
+                    self.publish_tag_avoid_command()
                 else:
                     self.get_logger().info('Tag36h11 detected, triggering publish_goal_reached.')
                     self.cancel_navigation()
                     self.activate_move_forward()
                     time.sleep(8.0)
-            elif 'tag36h11:2' in transform.child_frame_id:
+            if 'tag36h11:2' in transform.child_frame_id:
                 self.get_logger().info('Tag36h11:2 detected.')
                 if self.current_destination in ["C", "A"]:
-                    self.publish_goal_reached(self.current_destination)
+                    self.cancel_navigation()
+                    self.get_logger().info(f'cancel navigation ocurred')
+                    self.publish_tag_avoid_command()
+
+    def tag_avoid_callback(self, msg):
+        rest = self.tag_avoid_count % 4
+        if rest == 0:
+            self.current_destination = 'D'
+        elif rest == 1:
+            self.current_destination = 'C'
+        elif rest == 2:
+            self.current_destination = 'B'
+        elif rest == 3:
+            self.current_destination = 'A'
+        
+        self.tag_avoid_count += 1
+        self.publish_goal_reached(self.current_destination)
                 
 
     def cancel_navigation(self):
@@ -208,6 +228,12 @@ class MoveControlNode(Node):
         command_msg.data = 'start'
         self.curve_publisher.publish(command_msg)
         self.get_logger().info('Published message: Start')
+
+    def publish_tag_avoid_command(self):
+        command_msg = String()
+        command_msg.data = 'tag avoid'
+        self.tag_avoid_publisher.publish(command_msg)
+        self.get_logger().info('Published message: tag avoid')
 
 def main(args=None):
     rclpy.init(args=args)
