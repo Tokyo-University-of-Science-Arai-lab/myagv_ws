@@ -7,21 +7,21 @@ from std_msgs.msg import String
 
 class PDControlNode(Node):
     def __init__(self, namespace=''):
-        super().__init__('pd_control_node', namespace=namespace)
-        self.target_distance = 8.75  # 目標距離 7.91
+        super().__init__('second_pd_control_node', namespace=namespace)
+        self.target_distance = 8.75  # 目標距離
         self.kp = 0.87  # 比例ゲイン
         self.kd = 0.07  # 微分ゲイン
         self.cmd_vel_publisher = self.create_publisher(Twist, f'{namespace}/cmd_vel', 10)
         self.pd_control_subscription = self.create_subscription(String, f'{namespace}/apriltag_start', self.pd_control_callback, 10)
         self.node_start_publisher = self.create_publisher(String, f'{namespace}/node_start', 10)  # 起動メッセージのためのパブリッシャーを作成
-        self.publisher_arrival = self.create_publisher(String, f'{namespace}/arrival', 10)  # AGV到着メッセージのためのパブリッシャーを作成
+        self.arrival_publisher = self.create_publisher(String, '/agv_arrival', 10)  # AGV到着メッセージのためのパブリッシャーを作成
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
         self.prev_error = 0.0
         self.prev_time = self.get_clock().now()
         self.timer = self.create_timer(0.1, self.control_loop)
         self.pd_control_active = False  # PDループの制御用フラグ
-        self.arrival_count = 0  # AGVの到着回数をカウントする変数 実際は0
+        self.arrival_count = 0  # AGVの到着回数をカウントする変数
         self.publish_start_message()  # ノードが起動したことを発信
 
     def pd_control_callback(self, msg):
@@ -37,12 +37,11 @@ class PDControlNode(Node):
         try:
             now = rclpy.time.Time()
             namespace = self.get_namespace().strip("/")  # 先頭と末尾の '/' を取り除く
-            # 正しくフレーム名を構築
             cam_frame = 'default_cam'
             tag_frame = 'tag36h11:0'
             trans = self.tf_buffer.lookup_transform(cam_frame, tag_frame, now, timeout=rclpy.duration.Duration(seconds=1.0))
             distance = math.sqrt(trans.transform.translation.x ** 2 + trans.transform.translation.y ** 2 + trans.transform.translation.z ** 2)
-            #self.get_logger().info(f"distance={distance}")
+            self.get_logger().info(f"distance={distance}")
             error = self.target_distance - distance
             current_time = self.get_clock().now()
             dt = (current_time - self.prev_time).nanoseconds / 1e9
@@ -50,16 +49,37 @@ class PDControlNode(Node):
             control_signal = -1 * (self.kp * error + self.kd * derivative)
             control_signal = min(0.4, control_signal)
             cmd_vel_msg = Twist()
-            #cmd_vel_msg.linear.x = control_signal
-            cmd_vel_msg.linear.x = 0.0
-            self.get_logger().info(f"stop!")
-            
-            
+            cmd_vel_msg.linear.x = control_signal
+            '''
             if distance <= 0.005 or abs(cmd_vel_msg.linear.x) <= 0.08:
                 cmd_vel_msg.linear.x = 0.0
                 self.arrival_count += 1  # 到着回数をインクリメント
-                self.publish_arrival('agv1', 'F' if self.arrival_count % 2 == 1 else 'E')  # 変更点！！ 各agvの番号に変える、apriltagが増えたら修正
+                # 6の余りに基づいて到着位置を決定
+                remainder = self.arrival_count % 6
+                if remainder == 1:
+                    position = 'B'
+                elif remainder == 2:
+                    position = 'A'
+                elif remainder == 3:
+                    position = 'F'
+                elif remainder == 4:
+                    position = 'E'
+                elif remainder == 5:
+                    position = 'D'
+                else:
+                    position = 'C'
+                self.publish_arrival('agv1', position)  # 到着位置に応じてメッセージをパブリッシュ
                 self.pd_control_active = False
+            '''
+
+            
+            #100回試験用
+            if distance <= 0.005 or abs(cmd_vel_msg.linear.x) <= 0.08:
+                cmd_vel_msg.linear.x = 0.0
+                self.arrival_count += 1  # 到着回数をインクリメント
+                self.publish_arrival('agv1', 'F' if self.arrival_count % 2 != 0 else 'E')  # 各agvの番号に変える、apriltagが増えたら修正
+                self.pd_control_active = False
+            
             
             self.cmd_vel_publisher.publish(cmd_vel_msg)
             self.prev_error = error
@@ -75,9 +95,9 @@ class PDControlNode(Node):
 
     def publish_arrival(self, agv_id, position):
         msg = String()
-        msg.data = f'{agv_id} {position}'
-        self.publisher_arrival.publish(msg)
-        self.get_logger().info(f'{agv_id} {position}')
+        msg.data = f'{agv_id} arrived at {position}'
+        self.arrival_publisher.publish(msg)
+        self.get_logger().info(f'Publishing on /agv_arrival: {msg.data}')
 
 def main(args=None):
     rclpy.init(args=args)

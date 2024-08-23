@@ -22,18 +22,18 @@ def generate_launch_description():
     if not os.path.exists(camera_info_file):
         raise FileNotFoundError(f"Camera info file not found: {camera_info_file}")
     
-    namespace = LaunchConfiguration('namespace', default='agv1')
-    device = LaunchConfiguration('device', default='0')
+    namespace = LaunchConfiguration('namespace', default='')
+    device = LaunchConfiguration('device', default='/dev/video6')  # Updated device to /dev/video4
 
     return LaunchDescription([
         DeclareLaunchArgument(
             'namespace',
-            default_value='agv1',
+            default_value='',
             description='Namespace for the nodes'
         ),
         DeclareLaunchArgument(
             'device',
-            default_value='0',
+            default_value='/dev/video6',  # Updated device to /dev/video4
             description='Device ID for USB camera'
         ),
 
@@ -49,7 +49,7 @@ def generate_launch_description():
                     name='camera',
                     namespace='usb_cam',
                     parameters=[{
-                        'video_device': LaunchConfiguration('device', default='/dev/video0'),
+                        'video_device': LaunchConfiguration('device', default='/dev/video6'),  # Updated device to /dev/video4
                         'camera_info_url': f'file://{camera_info_file}'
                     }],
                     extra_arguments=[{'use_intra_process_comms': True}]
@@ -60,8 +60,8 @@ def generate_launch_description():
                     name='rectify',
                     namespace=namespace,
                     remappings=[
-                        ('image', '/agv1/image_raw'),
-                        ('camera_info', '/agv1/camera_info')
+                        ('image', '/image_raw'),
+                        ('camera_info', '/camera_info')
                     ],
                     extra_arguments=[{'use_intra_process_comms': True}]
                 ),
@@ -71,8 +71,8 @@ def generate_launch_description():
                     name='apriltag',
                     namespace=namespace,
                     remappings=[
-                        ('/apriltag/image_rect', '/agv1/image_raw'),
-                        ('/apriltag/camera_info', '/agv1/camera_info')
+                        ('/apriltag/image_rect', '/image_raw'),
+                        ('/apriltag/camera_info', '/camera_info')
                     ],
                     extra_arguments=[{'use_intra_process_comms': True}]
                 ),
@@ -98,15 +98,16 @@ def generate_launch_description():
             executable='usb_cam_node_exe',
             name='usb_cam',
             namespace=namespace,
-            parameters=[yaml_file],
+            parameters=[{'video_device': '/dev/video6'}, yaml_file],  # Updated device to /dev/video4
             output='screen',
         ),
         Node(
             package='myagv_communication',
             executable='move_forward_node',
             name='move_forward_node',
-            namespace=namespace,
+            namespace=namespace,  # このnamespaceがノードに渡されます
             output='screen',
+            parameters=[{'namespace': LaunchConfiguration('namespace')}]
         ),
     ])
 

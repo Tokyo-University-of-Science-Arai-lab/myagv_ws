@@ -118,9 +118,6 @@
     </collision>
   </link>
   
-  <link name="default_cam">
-  </link>
-
   <link name="dummy">
   </link>
 
@@ -161,12 +158,6 @@
     <parent link="base_link"/>
     <child  link="imu"/>
     <origin xyz="0.0 0.0 0.1096" rpy="0.0 0.0 0.0"/>
-  </joint>
-
-  <joint name="default_cam_joint" type="fixed">
-    <parent link="base_link"/>
-    <child  link="default_cam"/>
-    <origin xyz="0.0 0.0 0.3" rpy="0.0 0.0 0.0"/>
   </joint>
 
   <!-- Transmissions -->

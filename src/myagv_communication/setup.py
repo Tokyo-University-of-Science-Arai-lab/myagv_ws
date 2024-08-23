@@ -29,6 +29,13 @@ setup(
             "testpd_node = myagv_communication.testpd:main",
             "message_node = myagv_communication.message:main",
             "move_forward_node = myagv_communication.move_forward_node:main",
+            'test_node = myagv_communication.test_node:main',
+            "trans_command_node = myagv_communication.trans_command_node:main",
+            "distance_node = myagv_communication.distance:main",
+            "second_move_forward_node = myagv_communication.second_move_forward_node:main",
+            "second_pd_control_node = myagv_communication.second_pd_control_node:main",
+            'testapriltag = myagv_communication.testapriltag:main',
+            'tag_avoid_node = myagv_communication.tag_avoid_node:main',
         ],
     },
 )

@@ -23,6 +23,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'testapriltag = myagv_description.testapriltag:main',
+            "aprilnode = myagv_description.aprilnode:main",
         ],
     },
 )

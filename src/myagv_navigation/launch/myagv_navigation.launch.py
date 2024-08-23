@@ -20,7 +20,7 @@ def generate_launch_description():
     launch_dir = os.path.join(bringup_dir, 'launch')
 
     # 自分たちのマップとパラメータファイルのパスを設定
-    custom_map_file = os.path.join(get_package_share_directory('myagv_navigation'), 'map', 'demo0725_map.yaml')
+    custom_map_file = os.path.join(get_package_share_directory('myagv_navigation'), 'map', 'new_map.yaml')
     custom_params_file = os.path.join(get_package_share_directory('myagv_navigation'), 'config', 'agv1_param.yaml')
 
     # Create the launch configuration variables
@@ -71,12 +71,12 @@ def generate_launch_description():
 
     declare_namespace_cmd = DeclareLaunchArgument(
         'namespace',
-        default_value='agv3',
+        default_value='', ##########ここへんこう
         description='Top-level namespace')
 
     declare_use_namespace_cmd = DeclareLaunchArgument(
         'use_namespace',
-        default_value='true',
+        default_value='false', ############true or false!!!!!!!!!!!!!!!!!!!1
         description='Whether to apply a namespace to the navigation stack')
 
     declare_slam_cmd = DeclareLaunchArgument(
