@@ -91,8 +91,8 @@ void loop() {
     String data = Serial.readStringUntil('\n');
     int index = split(data, ',', cmds);
     if (index == 2) {
-      val2= cmds[0].toInt(); //変更
-      val1= cmds[1].toInt(); //変更
+      val1= cmds[0].toInt(); //変更
+      val2= cmds[1].toInt(); //変更
       cmds[0] = ""; // クリア
       cmds[1] = ""; // クリア
     }
@@ -106,12 +106,12 @@ void loop() {
   digitalWrite(INB2, val2 < 0 ? LOW : HIGH);  //HIGH:LOW
 
   unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis > 1000) {
+  if (currentMillis - previousMillis > 100) {
     previousMillis = currentMillis;
 
     noInterrupts();
-    float rpm_val_1 = (float)(encoderValue1 * 60 / ppr_val / gear_ratio);
-    float rpm_val_2 = (float)(-1 * encoderValue2 * 60 / ppr_val / gear_ratio);
+    float rpm_val_1 = (float)(encoderValue1 * 600 / ppr_val / gear_ratio);
+    float rpm_val_2 = (float)(-1 * encoderValue2 * 600 / ppr_val / gear_ratio);
     encoderValue1 = 0;
     encoderValue2 = 0;
     interrupts();
